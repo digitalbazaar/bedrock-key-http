@@ -23,7 +23,7 @@
     "async": "^1.4.2",
     "bedrock": "^1.0.6",
     "bedrock-docs": "^1.0.0",
-    "bedrock-key": "^0.0.1",
+    "bedrock-key": "digitalbazaar/bedrock-key#master",
     "bedrock-mongodb": "^1.0.2",
     "bedrock-passport": "^1.0.0",
     "bedrock-rest": "^1.1.0",
