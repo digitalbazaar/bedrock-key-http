@@ -23,6 +23,9 @@ var postKeys = {
   properties: {
     '@context': schemas.jsonldContext(constants.IDENTITY_CONTEXT_V1_URL),
     label: schemas.label(),
+    owner: schemas.identifier({
+      required: false
+    }),
     publicKeyPem: schemas.publicKeyPem(),
     privateKeyPem: schemas.privateKeyPem({required: false})
   },
