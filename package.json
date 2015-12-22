@@ -21,14 +21,16 @@
   "homepage": "https://github.com/digitalbazaar/bedrock-key-http",
   "dependencies": {
     "async": "^1.4.2",
+    "cors": "^2.7.1",
+    "underscore": "~1.7.0"
+  },
+  "peerDependencies": {
     "bedrock": "^1.0.6",
     "bedrock-docs": "^1.0.0",
     "bedrock-key": "digitalbazaar/bedrock-key#master",
     "bedrock-mongodb": "^1.0.2",
     "bedrock-passport": "^1.0.0",
     "bedrock-rest": "^1.1.0",
-    "bedrock-validation": "^1.0.0",
-    "cors": "^2.7.1",
-    "underscore": "~1.7.0"
+    "bedrock-validation": "^1.0.0"
   }
 }
