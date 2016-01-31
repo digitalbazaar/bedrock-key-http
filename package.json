@@ -1,6 +1,6 @@
 {
   "name": "bedrock-key-http",
-  "version": "0.0.1-dev",
+  "version": "1.0.0",
   "description": "A HTTP API for bedrock-key",
   "main": "./lib/main.js",
   "scripts": {
@@ -27,9 +27,9 @@
   "peerDependencies": {
     "bedrock": "^1.0.6",
     "bedrock-docs": "^1.0.0",
-    "bedrock-key": "digitalbazaar/bedrock-key#master",
+    "bedrock-key": "^1.0.0",
     "bedrock-mongodb": "^1.0.2",
-    "bedrock-passport": "^1.0.0",
+    "bedrock-passport": "^2.0.0",
     "bedrock-rest": "^1.1.0",
     "bedrock-validation": "^1.0.0"
   }
