@@ -18,6 +18,14 @@ var postKey = {
   additionalProperties: false
 };
 
+var getKeysQuery = {
+  title: 'Get Keys Query',
+  type: 'object',
+  properties: {
+    owner: schemas.identifier({required: true}),
+  }
+};
+
 var postKeys = {
   type: 'object',
   properties: {
@@ -34,6 +42,9 @@ var postKeys = {
 
 module.exports.postKey = function() {
   return postKey;
+};
+module.exports.getKeysQuery = function() {
+  return getKeysQuery;
 };
 module.exports.postKeys = function() {
   return postKeys;

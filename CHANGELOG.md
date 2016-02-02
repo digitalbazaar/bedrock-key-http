@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Changed
+- Add main keys collection.
+
 ## [1.0.0] - 2016-01-31
 
 ### Changed
