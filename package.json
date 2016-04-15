@@ -21,13 +21,6 @@
   "homepage": "https://github.com/digitalbazaar/bedrock-key-http",
   "dependencies": {
     "async": "^1.4.2",
-    "bedrock": "^1.0.6",
-    "bedrock-docs": "^2.0.0",
-    "bedrock-key": "^2.0.0",
-    "bedrock-mongodb": "^2.0.0",
-    "bedrock-passport": "^3.0.0",
-    "bedrock-rest": "^2.0.0",
-    "bedrock-validation": "^2.0.0",
     "cors": "^2.7.1",
     "lodash": "^4.1.0"
   },
