@@ -2,7 +2,12 @@
 
 ## [Unreleased]
 
-## [2.0.1] - 2016-03-15
+## [2.0.2] - 2016-04-28
+
+### Changed
+- Update bedrock-key dependency.
+
+## [2.0.1] - 2016-04-15
 
 ### Changed
 - Update bedrock dependencies.
@@ -22,7 +27,8 @@
 ### Changed
 - See git history for changes.
 
-[Unreleased]: https://github.com/digitalbazaar/bedrock-key-http/compare/2.0.1..HEAD
+[Unreleased]: https://github.com/digitalbazaar/bedrock-key-http/compare/2.0.2..HEAD
+[2.0.2]: https://github.com/digitalbazaar/bedrock-key-http/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/digitalbazaar/bedrock-key-http/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/digitalbazaar/bedrock-key-http/compare/1.0.1...2.0.0
 [1.0.1]: https://github.com/digitalbazaar/bedrock-key-http/compare/1.0.0...1.0.1
