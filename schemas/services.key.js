@@ -23,7 +23,12 @@ var getKeysQuery = {
   type: 'object',
   properties: {
     owner: schemas.identifier({required: true}),
-  }
+    capability: {
+      required: false,
+      enum: ['sign']
+    }
+  },
+  additionalProperties: false
 };
 
 var postKeys = {
