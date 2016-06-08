@@ -1,5 +1,7 @@
 # bedrock-key-http ChangeLog
 
+## 2.1.1 - 2016-06-07
+
 ### Changed
 - Update dependencies.
 
