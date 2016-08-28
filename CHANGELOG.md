@@ -1,5 +1,10 @@
 # bedrock-key-http ChangeLog
 
+## 2.1.2 - 2016-08-28
+
+### Changed
+- Add doc configs from bedrock-docs.
+
 ## 2.1.1 - 2016-06-07
 
 ### Changed
