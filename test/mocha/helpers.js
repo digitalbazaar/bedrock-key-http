@@ -1,20 +1,19 @@
 /*
- * Copyright (c) 2016 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2017 Digital Bazaar, Inc. All rights reserved.
  */
-/* jshint node: true */
 'use strict';
 
-var async = require('async');
-var brIdentity = require('bedrock-identity');
-var brKey = require('bedrock-key');
-var database = require('bedrock-mongodb');
-var uuid = require('uuid').v4;
+const async = require('async');
+const brIdentity = require('bedrock-identity');
+const brKey = require('bedrock-key');
+const database = require('bedrock-mongodb');
+const uuid = require('uuid').v4;
 
-var api = {};
+const api = {};
 module.exports = api;
 
 api.createHttpSignatureRequest = function(options) {
-  var newRequest = {
+  const newRequest = {
     url: options.url,
     httpSignature: {
       key: options.identity.keys.privateKey.privateKeyPem,
@@ -29,7 +28,7 @@ api.createHttpSignatureRequest = function(options) {
 };
 
 api.createIdentity = function(userName) {
-  var newIdentity = {
+  const newIdentity = {
     id: 'did:' + uuid(),
     type: 'Identity',
     sysSlug: userName,
@@ -46,7 +45,7 @@ api.createIdentity = function(userName) {
 };
 
 api.removeCollection = function(collection, callback) {
-  var collectionNames = [collection];
+  const collectionNames = [collection];
   database.openCollections(collectionNames, () => {
     async.each(collectionNames, function(collectionName, callback) {
       database.collections[collectionName].remove({}, callback);
@@ -57,7 +56,7 @@ api.removeCollection = function(collection, callback) {
 };
 
 api.removeCollections = function(callback) {
-  var collectionNames = ['identity', 'eventLog', 'publicKey'];
+  const collectionNames = ['identity', 'eventLog', 'publicKey'];
   database.openCollections(collectionNames, () => {
     async.each(collectionNames, (collectionName, callback) => {
       database.collections[collectionName].remove({}, callback);
@@ -68,16 +67,16 @@ api.removeCollections = function(callback) {
 };
 
 api.createKeyPair = function(options) {
-  var userName = options.userName;
-  var publicKey = options.publicKey;
-  var privateKey = options.privateKey;
-  var ownerId = null;
+  const userName = options.userName;
+  const publicKey = options.publicKey;
+  const privateKey = options.privateKey;
+  let ownerId = null;
   if(userName === 'userUnknown') {
     ownerId = '';
   } else {
     ownerId = options.userId;
   }
-  var newKeyPair = {
+  const newKeyPair = {
     publicKey: {
       '@context': 'https://w3id.org/identity/v1',
       id: ownerId + '/keys/1',
