@@ -1,5 +1,10 @@
 # bedrock-key-http ChangeLog
 
+## 2.1.3 - 2017-04-18
+
+### Changed
+- Add test suite.
+
 ## 2.1.2 - 2016-08-28
 
 ### Changed
