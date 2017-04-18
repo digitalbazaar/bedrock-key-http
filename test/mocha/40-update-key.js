@@ -1,53 +1,53 @@
 /*
- * Copyright (c) 2016 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2017 Digital Bazaar, Inc. All rights reserved.
  */
-/* globals describe, it, should, beforeEach */
-/* jshint node: true */
+/* globals should */
 'use strict';
 
-var async = require('async');
-var bedrock = require('bedrock');
-var brKey = require('bedrock-key');
-var config = bedrock.config;
-var helpers = require('./helpers');
-var mockData = require('./mock.data');
-var request = require('request');
+const async = require('async');
+const bedrock = require('bedrock');
+const brKey = require('bedrock-key');
+const config = bedrock.config;
+const helpers = require('./helpers');
+const mockData = require('./mock.data');
+let request = require('request');
 request = request.defaults({json: true, strictSSL: false});
-var url = require('url');
+const url = require('url');
 
-var urlObj = {
+const urlObj = {
   protocol: 'https',
   host: config.server.host,
   pathname: config.key.basePath
 };
 
-describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
+describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
   beforeEach(done => {
     helpers.prepareDatabase(mockData, done);
   });
 
   describe('authenticated as regularUser', () => {
-    var mockIdentity = mockData.identities.regularUser;
-    var actor = mockIdentity.identity;
+    const mockIdentity = mockData.identities.regularUser;
+    const actor = mockIdentity.identity;
 
     it('should update a public key for an actor using key id', done => {
-      var newPublicKey = {};
-      var queryPublicKey, orig, final;
-      var originalPublicKey = {
+      let newPublicKey = {};
+      let queryPublicKey;
+      let orig;
+      let final;
+      const originalPublicKey = {
         publicKeyPem: mockData.goodKeyPair.publicKeyPem,
         owner: actor.id,
         label: 'SigningKey00'
       };
 
       async.auto({
-        insert: function(callback) {
-          brKey.addPublicKey(null, originalPublicKey, callback);
-        },
+        insert: callback => brKey.addPublicKey(
+          null, originalPublicKey, callback),
         readOrig: ['insert', callback => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', (callback, results) => {
+        update: ['readOrig', callback => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -59,9 +59,8 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => {
-          brKey.getPublicKey(queryPublicKey, actor, callback);
-        }],
+        readUpdate: ['update', callback => brKey.getPublicKey(
+          queryPublicKey, actor, callback)],
         test: ['readUpdate', (callback, results) => {
           orig = results.readOrig;
           final = results.readUpdate;
@@ -75,28 +74,30 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
           final[0].owner.should.equal(actor.id);
           orig[0].sysStatus.should.equal(final[0].sysStatus);
           callback();
-        }],
+        }]
       }, done);
     });
 
     it('should return error for mismatched key id', done => {
-      var newPublicKey = {};
-      var queryPublicKey, final, orig, result;
-      var originalPublicKey = {
+      let newPublicKey = {};
+      let queryPublicKey;
+      let final;
+      let orig;
+      let result;
+      const originalPublicKey = {
         publicKeyPem: mockData.goodKeyPair.publicKeyPem,
         owner: actor.id,
         label: 'SigningKey00'
       };
 
       async.auto({
-        insert: function(callback) {
-          brKey.addPublicKey(null, originalPublicKey, callback);
-        },
+        insert: callback => brKey.addPublicKey(
+          null, originalPublicKey, callback),
         readOrig: ['insert', callback => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', (callback, results) => {
+        update: ['readOrig', callback => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id + 1,
@@ -108,9 +109,8 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => {
-          brKey.getPublicKey(queryPublicKey, actor, callback);
-        }],
+        readUpdate: ['update', callback => brKey.getPublicKey(
+          queryPublicKey, actor, callback)],
         test: ['readUpdate', (callback, results) => {
           result = results.update[0];
           orig = results.readOrig;
@@ -120,28 +120,30 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
           final[0].label.should.equal(orig[0].label);
           final[0].publicKeyPem.should.equal(orig[0].publicKeyPem);
           callback();
-        }],
+        }]
       }, done);
     });
 
     it('should revoke a public key using the key id', done => {
-      var newPublicKey = {};
-      var queryPublicKey, final, orig, result;
-      var originalPublicKey = {
+      let newPublicKey = {};
+      let queryPublicKey;
+      let final;
+      let orig;
+      let result;
+      const originalPublicKey = {
         publicKeyPem: mockData.goodKeyPair.publicKeyPem,
         owner: actor.id,
         label: 'SigningKey00'
       };
 
       async.auto({
-        insert: function(callback) {
-          brKey.addPublicKey(null, originalPublicKey, callback);
-        },
+        insert: callback => brKey.addPublicKey(
+          null, originalPublicKey, callback),
         readOrig: ['insert', callback => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', (callback, results) => {
+        update: ['readOrig', callback => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -154,9 +156,9 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => {
-          brKey.getPublicKey(queryPublicKey, actor, callback);
-        }],
+        readUpdate: ['update', callback => brKey.getPublicKey(
+          queryPublicKey, actor, callback)
+        ],
         test: ['readUpdate', (callback, results) => {
           result = results.update[0];
           orig = results.readOrig[0];
@@ -175,31 +177,33 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
           should.not.exist(orig.revoked);
           should.exist(final.revoked);
           callback();
-        }],
+        }]
       }, done);
     });
 
     it('should do nothing if there are no fields to update', done => {
-      var newPublicKey = {};
-      var queryPublicKey, orig, final, result;
-      var originalPublicKey = {
+      let newPublicKey = {};
+      let queryPublicKey;
+      let orig;
+      let final;
+      let result;
+      const originalPublicKey = {
         publicKeyPem: mockData.goodKeyPair.publicKeyPem,
         owner: actor.id,
         label: 'SigningKey00'
       };
 
       async.auto({
-        insert: function(callback) {
-          brKey.addPublicKey(null, originalPublicKey, callback);
-        },
+        insert: callback => brKey.addPublicKey(
+          null, originalPublicKey, callback),
         readOrig: ['insert', callback => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', (callback, results) => {
+        update: ['readOrig', callback => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
-            id: originalPublicKey.id,
+            id: originalPublicKey.id
           };
           request.post(helpers.createHttpSignatureRequest({
             url: originalPublicKey.id,
@@ -207,9 +211,8 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => {
-          brKey.getPublicKey(queryPublicKey, actor, callback);
-        }],
+        readUpdate: ['update', callback => brKey.getPublicKey(
+          queryPublicKey, actor, callback)],
         test: ['readUpdate', (callback, results) => {
           result = results.update[0];
           orig = results.readOrig[0];
@@ -225,28 +228,30 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
           final.owner.should.equal(actor.id);
           orig.sysStatus.should.equal(final.sysStatus);
           callback();
-        }],
+        }]
       }, done);
     });
 
     it('should return error if key id is not found', done => {
-      var newPublicKey = {};
-      var queryPublicKey, final, orig, result;
-      var originalPublicKey = {
+      let newPublicKey = {};
+      let queryPublicKey;
+      let final;
+      let orig;
+      let result;
+      const originalPublicKey = {
         publicKeyPem: mockData.goodKeyPair.publicKeyPem,
         owner: actor.id,
         label: 'SigningKey00'
       };
 
       async.auto({
-        insert: function(callback) {
-          brKey.addPublicKey(null, originalPublicKey, callback);
-        },
+        insert: callback => brKey.addPublicKey(
+          null, originalPublicKey, callback),
         readOrig: ['insert', callback => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', (callback, results) => {
+        update: ['readOrig', callback => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id + 1,
@@ -258,9 +263,8 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => {
-          brKey.getPublicKey(queryPublicKey, actor, callback);
-        }],
+        readUpdate: ['update', callback => brKey.getPublicKey(
+          queryPublicKey, actor, callback)],
         test: ['readUpdate', (callback, results) => {
           result = results.update[0];
           orig = results.readOrig;
@@ -270,34 +274,35 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
           final[0].label.should.equal(orig[0].label);
           final[0].publicKeyPem.should.equal(orig[0].publicKeyPem);
           callback();
-        }],
+        }]
       }, done);
     });
 
   }); // regular user
 
   describe('authenticated as adminUser', () => {
-    var mockIdentity = mockData.identities.adminUser;
-    var actor = mockIdentity.identity;
+    const mockIdentity = mockData.identities.adminUser;
+    const actor = mockIdentity.identity;
 
     it('should update a public key for an actor using key id', done => {
-      var newPublicKey = {};
-      var queryPublicKey, orig, final;
-      var originalPublicKey = {
+      let newPublicKey = {};
+      let queryPublicKey;
+      let orig;
+      let final;
+      const originalPublicKey = {
         publicKeyPem: mockData.goodKeyPair.publicKeyPem,
         owner: actor.id,
         label: 'SigningKey00'
       };
 
       async.auto({
-        insert: function(callback) {
-          brKey.addPublicKey(null, originalPublicKey, callback);
-        },
+        insert: callback => brKey.addPublicKey(
+          null, originalPublicKey, callback),
         readOrig: ['insert', callback => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', (callback, results) => {
+        update: ['readOrig', callback => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -309,9 +314,8 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => {
-          brKey.getPublicKey(queryPublicKey, actor, callback);
-        }],
+        readUpdate: ['update', callback => brKey.getPublicKey(
+          queryPublicKey, actor, callback)],
         test: ['readUpdate', (callback, results) => {
           orig = results.readOrig;
           final = results.readUpdate;
@@ -325,31 +329,32 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
           final[0].owner.should.equal(actor.id);
           orig[0].sysStatus.should.equal(final[0].sysStatus);
           callback();
-        }],
+        }]
       }, done);
     });
 
     it('should update public key for a different actor using key id', done => {
-      var newPublicKey = {};
-      var queryPublicKey, orig, final;
-      var mockIdentity2 = mockData.identities.regularUser2;
-      var secondActor = mockIdentity2.identity;
+      let newPublicKey = {};
+      let queryPublicKey;
+      let orig;
+      let final;
+      const mockIdentity2 = mockData.identities.regularUser2;
+      const secondActor = mockIdentity2.identity;
 
-      var originalPublicKey = {
+      const originalPublicKey = {
         publicKeyPem: mockData.goodKeyPair.publicKeyPem,
         owner: secondActor.id,
         label: 'SigningKey00'
       };
 
       async.auto({
-        insert: function(callback) {
-          brKey.addPublicKey(null, originalPublicKey, callback);
-        },
+        insert: callback => brKey.addPublicKey(
+          null, originalPublicKey, callback),
         readOrig: ['insert', callback => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', (callback, results) => {
+        update: ['readOrig', callback => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -361,9 +366,8 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => {
-          brKey.getPublicKey(queryPublicKey, actor, callback);
-        }],
+        readUpdate: ['update', callback => brKey.getPublicKey(
+          queryPublicKey, actor, callback)],
         test: ['readUpdate', (callback, results) => {
           orig = results.readOrig;
           final = results.readUpdate;
@@ -377,37 +381,38 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
           final[0].owner.should.equal(secondActor.id);
           orig[0].sysStatus.should.equal(final[0].sysStatus);
           callback();
-        }],
+        }]
       }, done);
     });
 
   }); // admin user
 
   describe('authenticated as user with no permissions', () => {
-    var mockIdentity = mockData.identities.noPermissionUser;
-    var actor = mockIdentity.identity;
+    const mockIdentity = mockData.identities.noPermissionUser;
+    const actor = mockIdentity.identity;
 
     it('should return error when updating public key w/o permissions', done => {
-      var newPublicKey = {};
-      var queryPublicKey, orig, final;
-      var mockIdentity2 = mockData.identities.regularUser2;
-      var secondActor = mockIdentity2.identity;
+      let newPublicKey = {};
+      let queryPublicKey;
+      let orig;
+      let final;
+      const mockIdentity2 = mockData.identities.regularUser2;
+      const secondActor = mockIdentity2.identity;
 
-      var originalPublicKey = {
+      const originalPublicKey = {
         publicKeyPem: mockData.goodKeyPair.publicKeyPem,
         owner: secondActor.id,
         label: 'SigningKey00'
       };
 
       async.auto({
-        insert: function(callback) {
-          brKey.addPublicKey(null, originalPublicKey, callback);
-        },
+        insert: callback => brKey.addPublicKey(
+          null, originalPublicKey, callback),
         readOrig: ['insert', callback => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', (callback, results) => {
+        update: ['readOrig', callback => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -419,11 +424,10 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => {
-          brKey.getPublicKey(queryPublicKey, actor, callback);
-        }],
+        readUpdate: ['update', callback => brKey.getPublicKey(
+          queryPublicKey, actor, callback)],
         test: ['readUpdate', (callback, results, err) => {
-          var result = results.update[0];
+          const result = results.update[0];
           orig = results.readOrig[0];
           final = results.readUpdate[0];
           should.not.exist(err);
@@ -449,7 +453,7 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', function() {
 
     it('should return error for nonauthenticated ID (no Key)', done => {
       urlObj.pathname += '/99';
-      request.post(url.format(urlObj), function(err, res, body) {
+      request.post(url.format(urlObj), (err, res, body) => {
         res.statusCode.should.equal(400);
         should.exist(body.type);
         body.type.should.equal('PermissionDenied');

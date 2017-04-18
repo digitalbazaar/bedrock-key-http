@@ -1,24 +1,19 @@
 /*
  * Bedrock Key HTTP Module Test Configuration.
  *
- * Copyright (c) 2012-2016 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2012-2017 Digital Bazaar, Inc. All rights reserved.
  */
-var config = require('bedrock').config;
-var path = require('path');
+const config = require('bedrock').config;
+const path = require('path');
 
-var permissions = config.permission.permissions;
-var roles = config.permission.roles;
+const permissions = config.permission.permissions;
+const roles = config.permission.roles;
 
 config.mocha.tests.push(path.join(__dirname, 'mocha'));
 
 // MongoDB
 config.mongodb.name = 'bedrock_key_http_test';
-config.mongodb.host = 'localhost';
-config.mongodb.port = 27017;
 config.mongodb.local.collection = 'bedrock_key_http_test';
-config.mongodb.username = 'bedrock';
-config.mongodb.password = 'password';
-config.mongodb.adminPrompt = true;
 config.mongodb.dropCollections = {};
 config.mongodb.dropCollections.onInit = true;
 config.mongodb.dropCollections.collections = [];

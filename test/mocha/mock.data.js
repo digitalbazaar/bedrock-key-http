@@ -1,16 +1,16 @@
 /*
- * Copyright (c) 2015-2016 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2017 Digital Bazaar, Inc. All rights reserved.
  */
 
 'use strict';
 
-var helpers = require('./helpers');
+const helpers = require('./helpers');
 
-var mock = {};
+const mock = {};
 module.exports = mock;
 
-var identities = mock.identities = {};
-var userName;
+const identities = mock.identities = {};
+let userName;
 
 // identity with permission to add public keys
 userName = 'regularUser';

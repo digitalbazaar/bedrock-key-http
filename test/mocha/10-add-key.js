@@ -1,37 +1,34 @@
 /*
- * Copyright (c) 2016 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2017 Digital Bazaar, Inc. All rights reserved.
  */
-/* globals describe, it, should, beforeEach */
-/* jshint node: true */
+/* globals should */
 'use strict';
 
-var async = require('async');
-var bedrock = require('bedrock');
-var config = bedrock.config;
-var database = require('bedrock-mongodb');
-var helpers = require('./helpers');
-var mockData = require('./mock.data');
-var request = require('request');
+const async = require('async');
+const bedrock = require('bedrock');
+const config = bedrock.config;
+const database = require('bedrock-mongodb');
+const helpers = require('./helpers');
+const mockData = require('./mock.data');
+let request = require('request');
 request = request.defaults({json: true, strictSSL: false});
-var url = require('url');
+const url = require('url');
 
-var urlObj = {
+const urlObj = {
   protocol: 'https',
   host: config.server.host,
   pathname: config.key.basePath
 };
 
-describe('bedrock-key-http API: addPublicKey', function() {
-  beforeEach(function(done) {
-    helpers.prepareDatabase(mockData, done);
-  });
+describe('bedrock-key-http API: addPublicKey', () => {
+  beforeEach(done => helpers.prepareDatabase(mockData, done));
 
   describe('authenticated as regularUser', () => {
-    var actor = mockData.identities.regularUser;
+    const actor = mockData.identities.regularUser;
 
     it('should add a valid public key with no private key', done => {
-      var newKey = mockData.goodKeyPair;
-      var samplePublicKey = {
+      const newKey = mockData.goodKeyPair;
+      const samplePublicKey = {
         '@context': 'https://w3id.org/identity/v1',
         label: 'Signing Key 1',
         owner: actor.identity.id,
@@ -39,30 +36,30 @@ describe('bedrock-key-http API: addPublicKey', function() {
       };
 
       async.auto({
-        insert: function(callback) {
-          database.collections.publicKey.find({
+        insert: callback => async.series([
+          callback => database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
-          }).toArray(function(err, result) {
+          }).toArray((err, result) => {
             should.not.exist(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
               actor.keys.publicKey.publicKeyPem);
-          });
-          request.post(helpers.createHttpSignatureRequest({
+            callback();
+          }),
+          callback => request.post(helpers.createHttpSignatureRequest({
             url: url.format(urlObj),
             body: samplePublicKey,
             identity: actor
           }), (err, res) => {
+            res.statusCode.should.equal(201);
             callback(err, res);
-          });
-        },
-        test: ['insert', function(callback, results, err) {
-          should.not.exist(err);
-          results.insert.statusCode.should.equal(201);
+          })
+        ], callback),
+        test: ['insert', callback => {
           database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
-          }).toArray(function(err, result) {
+          }).toArray((err, result) => {
             should.not.exist(err);
             should.exist(result);
             result.should.have.length(2);
@@ -76,8 +73,8 @@ describe('bedrock-key-http API: addPublicKey', function() {
     });
 
     it('should add a valid public key with matching private key', done => {
-      var newKey = mockData.goodKeyPair;
-      var samplePublicKey = {
+      const newKey = mockData.goodKeyPair;
+      const samplePublicKey = {
         '@context': 'https://w3id.org/identity/v1',
         label: 'Signing Key 1',
         owner: actor.identity.id,
@@ -86,30 +83,30 @@ describe('bedrock-key-http API: addPublicKey', function() {
       };
 
       async.auto({
-        insert: function(callback) {
-          database.collections.publicKey.find({
+        insert: callback => async.series([
+          callback => database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
-          }).toArray(function(err, result) {
+          }).toArray((err, result) => {
             should.not.exist(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
               actor.keys.publicKey.publicKeyPem);
-          });
-          request.post(helpers.createHttpSignatureRequest({
+            callback();
+          }),
+          callback => request.post(helpers.createHttpSignatureRequest({
             url: url.format(urlObj),
             body: samplePublicKey,
             identity: actor
           }), (err, res) => {
+            res.statusCode.should.equal(201);
             callback(err, res);
-          });
-        },
-        test: ['insert', function(callback, results, err) {
-          should.not.exist(err);
-          results.insert.statusCode.should.equal(201);
+          })
+        ], callback),
+        test: ['insert', callback => {
           database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
-          }).toArray(function(err, result) {
+          }).toArray((err, result) => {
             should.not.exist(err);
             should.exist(result);
             result.should.have.length(2);
@@ -125,8 +122,8 @@ describe('bedrock-key-http API: addPublicKey', function() {
     });
 
     it('should return error if adding public key w/ bad private key', done => {
-      var newKey = mockData.badKeyPair;
-      var samplePublicKey = {
+      const newKey = mockData.badKeyPair;
+      const samplePublicKey = {
         '@context': 'https://w3id.org/identity/v1',
         label: 'Signing Key 1',
         owner: actor.identity.id,
@@ -135,17 +132,14 @@ describe('bedrock-key-http API: addPublicKey', function() {
       };
 
       async.auto({
-        insert: function(callback) {
-          request.post(helpers.createHttpSignatureRequest({
-            url: url.format(urlObj),
-            body: samplePublicKey,
-            identity: actor
-          }), (err, res) => {
-            callback(err, res);
-          });
-        },
-        test: ['insert', function(callback, results, err) {
-          should.not.exist(err);
+        insert: callback => request.post(helpers.createHttpSignatureRequest({
+          url: url.format(urlObj),
+          body: samplePublicKey,
+          identity: actor
+        }), (err, res) => {
+          callback(err, res);
+        }),
+        test: ['insert', (callback, results) => {
           results.insert.statusCode.should.equal(400);
           results.insert.body.cause.type.should.equal('InvalidKeyPair');
           callback();
@@ -154,8 +148,8 @@ describe('bedrock-key-http API: addPublicKey', function() {
     });
 
     it('should return error if owner id does not match', done => {
-      var newKey = mockData.goodKeyPair;
-      var samplePublicKey = {
+      const newKey = mockData.goodKeyPair;
+      const samplePublicKey = {
         '@context': 'https://w3id.org/identity/v1',
         label: 'Signing Key 1',
         owner: actor.identity.id + 1,
@@ -164,17 +158,14 @@ describe('bedrock-key-http API: addPublicKey', function() {
       };
 
       async.auto({
-        insert: function(callback) {
-          request.post(helpers.createHttpSignatureRequest({
-            url: url.format(urlObj),
-            body: samplePublicKey,
-            identity: actor
-          }), (err, res) => {
-            callback(err, res);
-          });
-        },
-        test: ['insert', function(callback, results, err) {
-          should.not.exist(err);
+        insert: callback => request.post(helpers.createHttpSignatureRequest({
+          url: url.format(urlObj),
+          body: samplePublicKey,
+          identity: actor
+        }), (err, res) => {
+          callback(err, res);
+        }),
+        test: ['insert', (callback, results) => {
           results.insert.statusCode.should.equal(400);
           results.insert.body.cause.type.should.equal('PermissionDenied');
           callback();
@@ -185,11 +176,11 @@ describe('bedrock-key-http API: addPublicKey', function() {
   }); // regular user
 
   describe('authenticated as adminUser', () => {
-    var actor = mockData.identities.adminUser;
+    const actor = mockData.identities.adminUser;
 
     it('should add a valid public key for self', done => {
-      var newKey = mockData.goodKeyPair;
-      var samplePublicKey = {
+      const newKey = mockData.goodKeyPair;
+      const samplePublicKey = {
         '@context': 'https://w3id.org/identity/v1',
         label: 'Signing Key 1',
         owner: actor.identity.id,
@@ -197,30 +188,30 @@ describe('bedrock-key-http API: addPublicKey', function() {
       };
 
       async.auto({
-        insert: function(callback) {
-          database.collections.publicKey.find({
+        insert: callback => async.series([
+          callback => database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
-          }).toArray(function(err, result) {
+          }).toArray((err, result) => {
             should.not.exist(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
               actor.keys.publicKey.publicKeyPem);
-          });
-          request.post(helpers.createHttpSignatureRequest({
+            callback();
+          }),
+          callback => request.post(helpers.createHttpSignatureRequest({
             url: url.format(urlObj),
             body: samplePublicKey,
             identity: actor
           }), (err, res) => {
+            res.statusCode.should.equal(201);
             callback(err, res);
-          });
-        },
-        test: ['insert', function(callback, results, err) {
-          should.not.exist(err);
-          results.insert.statusCode.should.equal(201);
+          })
+        ], callback),
+        test: ['insert', callback => {
           database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
-          }).toArray(function(err, result) {
+          }).toArray((err, result) => {
             should.not.exist(err);
             should.exist(result);
             result.should.have.length(2);
@@ -234,9 +225,9 @@ describe('bedrock-key-http API: addPublicKey', function() {
     });
 
     it('should add a valid public key for another user', done => {
-      var actor2 = mockData.identities.regularUser;
-      var newKey = mockData.goodKeyPair;
-      var samplePublicKey = {
+      const actor2 = mockData.identities.regularUser;
+      const newKey = mockData.goodKeyPair;
+      const samplePublicKey = {
         '@context': 'https://w3id.org/identity/v1',
         label: 'Signing Key 1',
         owner: actor2.identity.id,
@@ -244,39 +235,40 @@ describe('bedrock-key-http API: addPublicKey', function() {
       };
 
       async.auto({
-        insert: function(callback) {
-          database.collections.publicKey.find({
+        insert: callback => async.series([
+          callback => database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
-          }).toArray(function(err, result) {
+          }).toArray((err, result) => {
             should.not.exist(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
               actor.keys.publicKey.publicKeyPem);
-          });
-          database.collections.publicKey.find({
+            callback();
+          }),
+          callback => database.collections.publicKey.find({
             'publicKey.owner': actor2.identity.id
-          }).toArray(function(err, result) {
+          }).toArray((err, result) => {
             should.not.exist(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
               actor2.keys.publicKey.publicKeyPem);
-          });
-          request.post(helpers.createHttpSignatureRequest({
+            callback();
+          }),
+          callback => request.post(helpers.createHttpSignatureRequest({
             url: url.format(urlObj),
             body: samplePublicKey,
             identity: actor
           }), (err, res) => {
+            res.statusCode.should.equal(201);
             callback(err, res);
-          });
-        },
-        test: ['insert', function(callback, results, err) {
-          should.not.exist(err);
-          results.insert.statusCode.should.equal(201);
+          })
+        ], callback),
+        test: ['insert', callback => {
           database.collections.publicKey.find({
             'publicKey.owner': actor2.identity.id
-          }).toArray(function(err, result) {
+          }).toArray((err, result) => {
             should.not.exist(err);
             should.exist(result);
             result.should.have.length(2);
@@ -292,11 +284,11 @@ describe('bedrock-key-http API: addPublicKey', function() {
   }); // admin user
 
   describe('authenticated as user with no permissions', () => {
-    var actor = mockData.identities.noPermissionUser;
+    const actor = mockData.identities.noPermissionUser;
 
     it('should return error when adding public key w/o permissions', done => {
-      var newKey = mockData.goodKeyPair;
-      var samplePublicKey = {
+      const newKey = mockData.goodKeyPair;
+      const samplePublicKey = {
         '@context': 'https://w3id.org/identity/v1',
         label: 'Signing Key 1',
         owner: actor.identity.id,
@@ -305,17 +297,14 @@ describe('bedrock-key-http API: addPublicKey', function() {
       };
 
       async.auto({
-        insert: function(callback) {
-          request.post(helpers.createHttpSignatureRequest({
-            url: url.format(urlObj),
-            body: samplePublicKey,
-            identity: actor
-          }), (err, res) => {
-            callback(err, res);
-          });
-        },
-        test: ['insert', function(callback, results, err) {
-          should.not.exist(err);
+        insert: callback => request.post(helpers.createHttpSignatureRequest({
+          url: url.format(urlObj),
+          body: samplePublicKey,
+          identity: actor
+        }), (err, res) => {
+          callback(err, res);
+        }),
+        test: ['insert', (callback, results) => {
           results.insert.statusCode.should.equal(400);
           results.insert.body.cause.type.should.equal('PermissionDenied');
           callback();
@@ -328,7 +317,7 @@ describe('bedrock-key-http API: addPublicKey', function() {
   describe('user with no authentication', () => {
 
     it('should return error when not authenticated', done => {
-      request.post(url.format(urlObj), function(err, res, body) {
+      request.post(url.format(urlObj), (err, res, body) => {
         res.statusCode.should.equal(400);
         should.exist(body);
         body.should.be.an('object');
