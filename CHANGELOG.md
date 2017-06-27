@@ -1,5 +1,10 @@
 # bedrock-key-http ChangeLog
 
+## 2.2.0 - 2017-06-27
+
+### Changed
+- Upgrade `bedrock-key` peer dependency from 3.x to 4.x.
+
 ## 2.1.3 - 2017-04-18
 
 ### Changed
