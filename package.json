@@ -1,6 +1,6 @@
 {
   "name": "bedrock-key-http",
-  "version": "2.2.1",
+  "version": "2.2.2-0",
   "description": "A HTTP API for bedrock-key",
   "main": "./lib",
   "repository": {
