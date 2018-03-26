@@ -1,5 +1,7 @@
 # bedrock-key-http ChangeLog
 
+## 2.2.1 - 2018-03-26
+
 ### Changed
 - Update `bedrock-mongodb` peer dependency.
 
