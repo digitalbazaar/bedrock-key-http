@@ -73,13 +73,14 @@ describe('bedrock-key-http API: getPublicKeys', function() {
           should.not.exist(err);
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
-          results.get.body.should.have.length(2);
-          result[0].publicKeyPem.should.equal(
-            mockIdentity.keys.publicKey.publicKeyPem);
-          result[0].owner.should.equal(mockIdentity.identity.id);
-          result[1].publicKeyPem.should.equal(
-            samplePublicKey.publicKeyPem);
-          result[1].owner.should.equal(mockIdentity.identity.id);
+          result.should.have.length(2);
+          const keyMaterial = result.map(k => k.publicKeyPem);
+          keyMaterial.should.have.same.members([
+            mockIdentity.keys.publicKey.publicKeyPem,
+            samplePublicKey.publicKeyPem
+          ]);
+          const owners = result.map(k => k.owner);
+          owners.every(o => o === mockIdentity.identity.id).should.be.true;
           callback();
         }]
       }, done);
