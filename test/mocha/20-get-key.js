@@ -40,15 +40,14 @@ describe('bedrock-key-http API: getPublicKey', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, samplePublicKey, privateKey, callback),
-        get: ['insert', callback => request.get(
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
             callback(err, res);
           })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
@@ -69,15 +68,14 @@ describe('bedrock-key-http API: getPublicKey', () => {
 
       async.auto({
         insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
-        get: ['insert', callback => request.get(
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
             callback(err, res);
           })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
@@ -96,15 +94,14 @@ describe('bedrock-key-http API: getPublicKey', () => {
 
       async.auto({
         insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
-        get: ['insert', callback => request.get(
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: (samplePublicKey.id + 1),
             identity: mockIdentity
           }), (err, res) => {
             callback(err, res);
           })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(404);
           const result = results.get;
           should.exist(result.body);
@@ -133,15 +130,14 @@ describe('bedrock-key-http API: getPublicKey', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, samplePublicKey, privateKey, callback),
-        get: ['insert', callback => request.get(
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
             callback(err, res);
           })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
@@ -162,15 +158,14 @@ describe('bedrock-key-http API: getPublicKey', () => {
 
       async.auto({
         insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
-        get: ['insert', callback => request.get(
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
             callback(err, res);
           })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
@@ -198,15 +193,14 @@ describe('bedrock-key-http API: getPublicKey', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, samplePublicKey, privateKey, callback),
-        get: ['insert', callback => request.get(
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
             callback(err, res);
           })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);

@@ -56,7 +56,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
             callback(err, res);
           })
         ], callback),
-        test: ['insert', callback => {
+        test: ['insert', (results, callback) => {
           database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
@@ -103,7 +103,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
             callback(err, res);
           })
         ], callback),
-        test: ['insert', callback => {
+        test: ['insert', (results, callback) => {
           database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
@@ -139,7 +139,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
         }), (err, res) => {
           callback(err, res);
         }),
-        test: ['insert', (callback, results) => {
+        test: ['insert', (results, callback) => {
           results.insert.statusCode.should.equal(400);
           results.insert.body.cause.type.should.equal('InvalidKeyPair');
           callback();
@@ -165,7 +165,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
         }), (err, res) => {
           callback(err, res);
         }),
-        test: ['insert', (callback, results) => {
+        test: ['insert', (results, callback) => {
           results.insert.statusCode.should.equal(400);
           results.insert.body.cause.type.should.equal('PermissionDenied');
           callback();
@@ -208,7 +208,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
             callback(err, res);
           })
         ], callback),
-        test: ['insert', callback => {
+        test: ['insert', (results, callback) => {
           database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
@@ -265,7 +265,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
             callback(err, res);
           })
         ], callback),
-        test: ['insert', callback => {
+        test: ['insert', (results, callback) => {
           database.collections.publicKey.find({
             'publicKey.owner': actor2.identity.id
           }).toArray((err, result) => {
@@ -304,7 +304,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
         }), (err, res) => {
           callback(err, res);
         }),
-        test: ['insert', (callback, results) => {
+        test: ['insert', (results, callback) => {
           results.insert.statusCode.should.equal(400);
           results.insert.body.cause.type.should.equal('PermissionDenied');
           callback();

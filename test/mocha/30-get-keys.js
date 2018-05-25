@@ -39,8 +39,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -60,7 +59,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
 
       async.auto({
         insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
-        get: ['insert', callback => {
+        get: ['insert', (results, callback) => {
           urlObj.query = {owner: mockIdentity.identity.id};
           request.get(helpers.createHttpSignatureRequest({
             url: url.format(urlObj),
@@ -69,8 +68,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
             callback(err, res);
           });
         }],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.should.have.length(2);
@@ -97,7 +95,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, samplePublicKey, privateKey, callback),
-        get: ['insert', callback => {
+        get: ['insert', (results, callback) => {
           urlObj.query = {
             owner: mockIdentity.identity.id,
             capability: 'sign'
@@ -109,8 +107,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
             callback(err, res);
           });
         }],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -134,8 +131,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           results.get.body.should.have.length(0);
           callback();
@@ -156,8 +152,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -186,8 +181,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -212,8 +206,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -243,8 +236,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);

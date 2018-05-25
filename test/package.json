@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/digitalbazaar/bedrock-key-http",
   "dependencies": {
-    "async": "^1.5.2",
+    "async": "^2.6.1",
     "bedrock": "^1.0.6",
     "bedrock-did-client": "^1.0.0",
     "bedrock-docs": "^2.0.1",

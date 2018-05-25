@@ -43,11 +43,11 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, originalPublicKey, callback),
-        readOrig: ['insert', callback => {
+        readOrig: ['insert', (results, callback) => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', callback => {
+        update: ['readOrig', (results, callback) => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -59,9 +59,9 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => brKey.getPublicKey(
+        readUpdate: ['update', (results, callback) => brKey.getPublicKey(
           queryPublicKey, actor, callback)],
-        test: ['readUpdate', (callback, results) => {
+        test: ['readUpdate', (results, callback) => {
           orig = results.readOrig;
           final = results.readUpdate;
           orig[0].label.should.equal(originalPublicKey.label);
@@ -93,11 +93,11 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, originalPublicKey, callback),
-        readOrig: ['insert', callback => {
+        readOrig: ['insert', (results, callback) => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', callback => {
+        update: ['readOrig', (results, callback) => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id + 1,
@@ -109,9 +109,9 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => brKey.getPublicKey(
+        readUpdate: ['update', (results, callback) => brKey.getPublicKey(
           queryPublicKey, actor, callback)],
-        test: ['readUpdate', (callback, results) => {
+        test: ['readUpdate', (results, callback) => {
           result = results.update[0];
           orig = results.readOrig;
           final = results.readUpdate;
@@ -139,11 +139,11 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, originalPublicKey, callback),
-        readOrig: ['insert', callback => {
+        readOrig: ['insert', (results, callback) => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', callback => {
+        update: ['readOrig', (results, callback) => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -156,10 +156,10 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => brKey.getPublicKey(
+        readUpdate: ['update', (results, callback) => brKey.getPublicKey(
           queryPublicKey, actor, callback)
         ],
-        test: ['readUpdate', (callback, results) => {
+        test: ['readUpdate', (results, callback) => {
           result = results.update[0];
           orig = results.readOrig[0];
           final = results.readUpdate[0];
@@ -196,11 +196,11 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, originalPublicKey, callback),
-        readOrig: ['insert', callback => {
+        readOrig: ['insert', (results, callback) => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', callback => {
+        update: ['readOrig', (results, callback) => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id
@@ -211,9 +211,9 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => brKey.getPublicKey(
+        readUpdate: ['update', (results, callback) => brKey.getPublicKey(
           queryPublicKey, actor, callback)],
-        test: ['readUpdate', (callback, results) => {
+        test: ['readUpdate', (results, callback) => {
           result = results.update[0];
           orig = results.readOrig[0];
           final = results.readUpdate[0];
@@ -247,11 +247,11 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, originalPublicKey, callback),
-        readOrig: ['insert', callback => {
+        readOrig: ['insert', (results, callback) => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', callback => {
+        update: ['readOrig', (results, callback) => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id + 1,
@@ -263,9 +263,9 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => brKey.getPublicKey(
+        readUpdate: ['update', (results, callback) => brKey.getPublicKey(
           queryPublicKey, actor, callback)],
-        test: ['readUpdate', (callback, results) => {
+        test: ['readUpdate', (results, callback) => {
           result = results.update[0];
           orig = results.readOrig;
           final = results.readUpdate;
@@ -298,11 +298,11 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, originalPublicKey, callback),
-        readOrig: ['insert', callback => {
+        readOrig: ['insert', (results, callback) => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', callback => {
+        update: ['readOrig', (results, callback) => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -314,9 +314,9 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => brKey.getPublicKey(
+        readUpdate: ['update', (results, callback) => brKey.getPublicKey(
           queryPublicKey, actor, callback)],
-        test: ['readUpdate', (callback, results) => {
+        test: ['readUpdate', (results, callback) => {
           orig = results.readOrig;
           final = results.readUpdate;
           orig[0].label.should.equal(originalPublicKey.label);
@@ -350,11 +350,11 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, originalPublicKey, callback),
-        readOrig: ['insert', callback => {
+        readOrig: ['insert', (results, callback) => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', callback => {
+        update: ['readOrig', (results, callback) => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -366,9 +366,9 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => brKey.getPublicKey(
+        readUpdate: ['update', (results, callback) => brKey.getPublicKey(
           queryPublicKey, actor, callback)],
-        test: ['readUpdate', (callback, results) => {
+        test: ['readUpdate', (results, callback) => {
           orig = results.readOrig;
           final = results.readUpdate;
           orig[0].label.should.equal(originalPublicKey.label);
@@ -408,11 +408,11 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
       async.auto({
         insert: callback => brKey.addPublicKey(
           null, originalPublicKey, callback),
-        readOrig: ['insert', callback => {
+        readOrig: ['insert', (results, callback) => {
           queryPublicKey = {id: originalPublicKey.id};
           brKey.getPublicKey(queryPublicKey, actor, callback);
         }],
-        update: ['readOrig', callback => {
+        update: ['readOrig', (results, callback) => {
           newPublicKey = {
             '@context': 'https://w3id.org/identity/v1',
             id: originalPublicKey.id,
@@ -424,13 +424,12 @@ describe('bedrock-key-http API: Update PublicKey (postPublicKey)', () => {
             identity: mockIdentity
           }), callback);
         }],
-        readUpdate: ['update', callback => brKey.getPublicKey(
+        readUpdate: ['update', (results, callback) => brKey.getPublicKey(
           queryPublicKey, actor, callback)],
-        test: ['readUpdate', (callback, results, err) => {
+        test: ['readUpdate', (results, callback) => {
           const result = results.update[0];
           orig = results.readOrig[0];
           final = results.readUpdate[0];
-          should.not.exist(err);
           result.statusCode.should.equal(403);
           result.body.type.should.equal('PermissionDenied');
           orig.label.should.equal(originalPublicKey.label);
