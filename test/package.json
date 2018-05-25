@@ -39,7 +39,6 @@
     "bedrock-views": "^4.0.0",
     "buffer-equal": "^1.0.0",
     "cors": "^2.7.1",
-    "lodash": "^4.1.0",
     "uuid": "^2.0.3"
   },
   "private": true
