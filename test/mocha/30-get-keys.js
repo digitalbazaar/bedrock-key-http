@@ -20,7 +20,7 @@ const urlObj = {
   pathname: config.key.basePath
 };
 
-describe('bedrock-key-http API: getPublicKeys', function() {
+describe('bedrock-key-http API: getPublicKeys', () => {
   beforeEach(done => {
     helpers.prepareDatabase(mockData, done);
   });
@@ -262,7 +262,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
 
     it('should return nothing for a non authenticated owner', done => {
       urlObj.query = {owner: 'foo'};
-      request.get(url.format(urlObj), function(err, res) {
+      request.get(url.format(urlObj), (err, res) => {
         res.statusCode.should.equal(200);
         should.exist(res.body);
         res.body.should.have.length(0);

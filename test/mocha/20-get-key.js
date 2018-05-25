@@ -20,7 +20,7 @@ const urlObj = {
   pathname: config.key.basePath
 };
 
-describe('bedrock-key-http API: getPublicKey', function() {
+describe('bedrock-key-http API: getPublicKey', () => {
   beforeEach(done => {
     helpers.prepareDatabase(mockData, done);
   });
@@ -45,8 +45,8 @@ describe('bedrock-key-http API: getPublicKey', function() {
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
+            callback(err, res);
+          })],
         test: ['get', (callback, results, err) => {
           should.not.exist(err);
           results.get.statusCode.should.equal(200);
@@ -74,8 +74,8 @@ describe('bedrock-key-http API: getPublicKey', function() {
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
+            callback(err, res);
+          })],
         test: ['get', (callback, results, err) => {
           should.not.exist(err);
           results.get.statusCode.should.equal(200);
@@ -101,8 +101,8 @@ describe('bedrock-key-http API: getPublicKey', function() {
             url: (samplePublicKey.id + 1),
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
+            callback(err, res);
+          })],
         test: ['get', (callback, results, err) => {
           should.not.exist(err);
           results.get.statusCode.should.equal(404);
@@ -138,8 +138,8 @@ describe('bedrock-key-http API: getPublicKey', function() {
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
+            callback(err, res);
+          })],
         test: ['get', (callback, results, err) => {
           should.not.exist(err);
           results.get.statusCode.should.equal(200);
@@ -167,8 +167,8 @@ describe('bedrock-key-http API: getPublicKey', function() {
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
+            callback(err, res);
+          })],
         test: ['get', (callback, results, err) => {
           should.not.exist(err);
           results.get.statusCode.should.equal(200);
@@ -203,8 +203,8 @@ describe('bedrock-key-http API: getPublicKey', function() {
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
+            callback(err, res);
+          })],
         test: ['get', (callback, results, err) => {
           should.not.exist(err);
           results.get.statusCode.should.equal(200);
@@ -223,7 +223,7 @@ describe('bedrock-key-http API: getPublicKey', function() {
 
     it('should return error for nonauthenticated ID (no Key)', done => {
       urlObj.pathname += '/99';
-      request.get(url.format(urlObj), function(err, res) {
+      request.get(url.format(urlObj), (err, res) => {
         res.statusCode.should.equal(404);
         should.exist(res.body.type);
         res.body.type.should.equal('NotFound');
