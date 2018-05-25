@@ -27,7 +27,7 @@
     "bedrock-express": "^2.0.6",
     "bedrock-identity": "^4.2.4",
     "bedrock-key": "^4.0.0",
-    "bedrock-mongodb": "^3.0.0",
+    "bedrock-mongodb": "^5.0.0",
     "bedrock-passport": "^3.0.0",
     "bedrock-permission": "^2.4.2",
     "bedrock-requirejs": "^2.0.0",
