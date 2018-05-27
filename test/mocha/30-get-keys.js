@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016-2018 Digital Bazaar, Inc. All rights reserved.
  */
-/* globals should */
 'use strict';
 
 const async = require('async');
@@ -58,7 +57,8 @@ describe('bedrock-key-http API: getPublicKeys', () => {
       samplePublicKey.owner = mockIdentity.identity.id;
 
       async.auto({
-        insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
+        insert: callback => brKey.addPublicKey(
+          {actor: null, publicKey: samplePublicKey}, callback),
         get: ['insert', (results, callback) => {
           urlObj.query = {owner: mockIdentity.identity.id};
           request.get(helpers.createHttpSignatureRequest({
@@ -94,7 +94,7 @@ describe('bedrock-key-http API: getPublicKeys', () => {
 
       async.auto({
         insert: callback => brKey.addPublicKey(
-          null, samplePublicKey, privateKey, callback),
+          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
         get: ['insert', (results, callback) => {
           urlObj.query = {
             owner: mockIdentity.identity.id,

@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016-2018 Digital Bazaar, Inc. All rights reserved.
  */
-/* globals should */
 'use strict';
 
 const async = require('async');
@@ -40,7 +39,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
           callback => database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
-            should.not.exist(err);
+            assertNoError(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
@@ -60,7 +59,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
           database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
-            should.not.exist(err);
+            assertNoError(err);
             should.exist(result);
             result.should.have.length(2);
             result[1].publicKey.publicKeyPem.should.equal(
@@ -87,7 +86,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
           callback => database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
-            should.not.exist(err);
+            assertNoError(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
@@ -107,7 +106,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
           database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
-            should.not.exist(err);
+            assertNoError(err);
             should.exist(result);
             result.should.have.length(2);
             result[1].publicKey.publicKeyPem.should.equal(
@@ -192,7 +191,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
           callback => database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
-            should.not.exist(err);
+            assertNoError(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
@@ -212,7 +211,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
           database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
-            should.not.exist(err);
+            assertNoError(err);
             should.exist(result);
             result.should.have.length(2);
             result[1].publicKey.publicKeyPem.should.equal(
@@ -239,7 +238,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
           callback => database.collections.publicKey.find({
             'publicKey.owner': actor.identity.id
           }).toArray((err, result) => {
-            should.not.exist(err);
+            assertNoError(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
@@ -249,7 +248,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
           callback => database.collections.publicKey.find({
             'publicKey.owner': actor2.identity.id
           }).toArray((err, result) => {
-            should.not.exist(err);
+            assertNoError(err);
             should.exist(result);
             result.should.have.length(1);
             result[0].publicKey.publicKeyPem.should.equal(
@@ -269,7 +268,7 @@ describe('bedrock-key-http API: addPublicKey', () => {
           database.collections.publicKey.find({
             'publicKey.owner': actor2.identity.id
           }).toArray((err, result) => {
-            should.not.exist(err);
+            assertNoError(err);
             should.exist(result);
             result.should.have.length(2);
             result[1].publicKey.publicKeyPem.should.equal(

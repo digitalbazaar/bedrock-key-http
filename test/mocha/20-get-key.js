@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016-2018 Digital Bazaar, Inc. All rights reserved.
  */
-/* globals should */
 'use strict';
 
 const async = require('async');
@@ -39,7 +38,7 @@ describe('bedrock-key-http API: getPublicKey', () => {
 
       async.auto({
         insert: callback => brKey.addPublicKey(
-          null, samplePublicKey, privateKey, callback),
+          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
         get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
@@ -67,7 +66,8 @@ describe('bedrock-key-http API: getPublicKey', () => {
       samplePublicKey.owner = secondActor.id;
 
       async.auto({
-        insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
+        insert: callback => brKey.addPublicKey(
+          {actor: null, publicKey: samplePublicKey}, callback),
         get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
@@ -93,7 +93,8 @@ describe('bedrock-key-http API: getPublicKey', () => {
       samplePublicKey.owner = actor.id;
 
       async.auto({
-        insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
+        insert: callback => brKey.addPublicKey({
+          actor: null, publicKey: samplePublicKey}, callback),
         get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: (samplePublicKey.id + 1),
@@ -107,7 +108,7 @@ describe('bedrock-key-http API: getPublicKey', () => {
           should.exist(result.body);
           result.body.should.be.an('object');
           should.exist(result.body.type);
-          result.body.type.should.equal('NotFound');
+          result.body.type.should.equal('NotFoundError');
           callback();
         }]
       }, done);
@@ -129,7 +130,7 @@ describe('bedrock-key-http API: getPublicKey', () => {
 
       async.auto({
         insert: callback => brKey.addPublicKey(
-          null, samplePublicKey, privateKey, callback),
+          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
         get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
@@ -157,7 +158,8 @@ describe('bedrock-key-http API: getPublicKey', () => {
       samplePublicKey.owner = secondActor.id;
 
       async.auto({
-        insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
+        insert: callback => brKey.addPublicKey(
+          {actor: null, publicKey: samplePublicKey}, callback),
         get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
@@ -192,7 +194,7 @@ describe('bedrock-key-http API: getPublicKey', () => {
 
       async.auto({
         insert: callback => brKey.addPublicKey(
-          null, samplePublicKey, privateKey, callback),
+          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
         get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
@@ -220,7 +222,7 @@ describe('bedrock-key-http API: getPublicKey', () => {
       request.get(url.format(urlObj), (err, res) => {
         res.statusCode.should.equal(404);
         should.exist(res.body.type);
-        res.body.type.should.equal('NotFound');
+        res.body.type.should.equal('NotFoundError');
         done();
       });
     });
