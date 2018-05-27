@@ -1,7 +1,6 @@
 /*
- * Copyright (c) 2016-2017 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2018 Digital Bazaar, Inc. All rights reserved.
  */
-/* globals should */
 'use strict';
 
 const async = require('async');
@@ -20,7 +19,7 @@ const urlObj = {
   pathname: config.key.basePath
 };
 
-describe('bedrock-key-http API: getPublicKey', function() {
+describe('bedrock-key-http API: getPublicKey', () => {
   beforeEach(done => {
     helpers.prepareDatabase(mockData, done);
   });
@@ -39,16 +38,15 @@ describe('bedrock-key-http API: getPublicKey', function() {
 
       async.auto({
         insert: callback => brKey.addPublicKey(
-          null, samplePublicKey, privateKey, callback),
-        get: ['insert', callback => request.get(
+          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+            callback(err, res);
+          })],
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
@@ -68,16 +66,16 @@ describe('bedrock-key-http API: getPublicKey', function() {
       samplePublicKey.owner = secondActor.id;
 
       async.auto({
-        insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
-        get: ['insert', callback => request.get(
+        insert: callback => brKey.addPublicKey(
+          {actor: null, publicKey: samplePublicKey}, callback),
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+            callback(err, res);
+          })],
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
@@ -95,22 +93,22 @@ describe('bedrock-key-http API: getPublicKey', function() {
       samplePublicKey.owner = actor.id;
 
       async.auto({
-        insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
-        get: ['insert', callback => request.get(
+        insert: callback => brKey.addPublicKey({
+          actor: null, publicKey: samplePublicKey}, callback),
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: (samplePublicKey.id + 1),
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+            callback(err, res);
+          })],
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(404);
           const result = results.get;
           should.exist(result.body);
           result.body.should.be.an('object');
           should.exist(result.body.type);
-          result.body.type.should.equal('NotFound');
+          result.body.type.should.equal('NotFoundError');
           callback();
         }]
       }, done);
@@ -132,16 +130,15 @@ describe('bedrock-key-http API: getPublicKey', function() {
 
       async.auto({
         insert: callback => brKey.addPublicKey(
-          null, samplePublicKey, privateKey, callback),
-        get: ['insert', callback => request.get(
+          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+            callback(err, res);
+          })],
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
@@ -161,16 +158,16 @@ describe('bedrock-key-http API: getPublicKey', function() {
       samplePublicKey.owner = secondActor.id;
 
       async.auto({
-        insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
-        get: ['insert', callback => request.get(
+        insert: callback => brKey.addPublicKey(
+          {actor: null, publicKey: samplePublicKey}, callback),
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+            callback(err, res);
+          })],
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
@@ -197,16 +194,15 @@ describe('bedrock-key-http API: getPublicKey', function() {
 
       async.auto({
         insert: callback => brKey.addPublicKey(
-          null, samplePublicKey, privateKey, callback),
-        get: ['insert', callback => request.get(
+          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
+        get: ['insert', (results, callback) => request.get(
           helpers.createHttpSignatureRequest({
             url: samplePublicKey.id,
             identity: mockIdentity
           }), (err, res) => {
-          callback(err, res);
-        })],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+            callback(err, res);
+          })],
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
@@ -223,10 +219,10 @@ describe('bedrock-key-http API: getPublicKey', function() {
 
     it('should return error for nonauthenticated ID (no Key)', done => {
       urlObj.pathname += '/99';
-      request.get(url.format(urlObj), function(err, res) {
+      request.get(url.format(urlObj), (err, res) => {
         res.statusCode.should.equal(404);
         should.exist(res.body.type);
-        res.body.type.should.equal('NotFound');
+        res.body.type.should.equal('NotFoundError');
         done();
       });
     });

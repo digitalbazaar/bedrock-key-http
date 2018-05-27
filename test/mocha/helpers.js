@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2018 Digital Bazaar, Inc. All rights reserved.
  */
 'use strict';
 
@@ -7,18 +7,18 @@ const async = require('async');
 const brIdentity = require('bedrock-identity');
 const brKey = require('bedrock-key');
 const database = require('bedrock-mongodb');
-const uuid = require('uuid').v4;
+const uuid = require('uuid/v4');
 
 const api = {};
 module.exports = api;
 
-api.createHttpSignatureRequest = function(options) {
+api.createHttpSignatureRequest = options => {
   const newRequest = {
     url: options.url,
     httpSignature: {
       key: options.identity.keys.privateKey.privateKeyPem,
       keyId: options.identity.keys.publicKey.id,
-      headers: ['date', 'host', 'request-line']
+      headers: ['date', 'host', '(request-target)']
     }
   };
   if(options.body) {
@@ -27,7 +27,7 @@ api.createHttpSignatureRequest = function(options) {
   return newRequest;
 };
 
-api.createIdentity = function(userName) {
+api.createIdentity = userName => {
   const newIdentity = {
     id: 'did:' + uuid(),
     type: 'Identity',
@@ -44,29 +44,27 @@ api.createIdentity = function(userName) {
   return newIdentity;
 };
 
-api.removeCollection = function(collection, callback) {
+api.removeCollection = (collection, callback) => {
   const collectionNames = [collection];
   database.openCollections(collectionNames, () => {
-    async.each(collectionNames, function(collectionName, callback) {
+    async.each(collectionNames, (collectionName, callback) => {
       database.collections[collectionName].remove({}, callback);
-    }, function(err) {
+    }, err => {
       callback(err);
     });
   });
 };
 
-api.removeCollections = function(callback) {
+api.removeCollections = callback => {
   const collectionNames = ['identity', 'eventLog', 'publicKey'];
   database.openCollections(collectionNames, () => {
     async.each(collectionNames, (collectionName, callback) => {
       database.collections[collectionName].remove({}, callback);
-    }, function(err) {
-      callback(err);
-    });
+    }, err => callback(err));
   });
 };
 
-api.createKeyPair = function(options) {
+api.createKeyPair = options => {
   const userName = options.userName;
   const publicKey = options.publicKey;
   const privateKey = options.privateKey;
@@ -80,7 +78,7 @@ api.createKeyPair = function(options) {
     publicKey: {
       '@context': 'https://w3id.org/identity/v1',
       id: ownerId + '/keys/1',
-      type: 'CryptographicKey',
+      type: ['CryptographicKey', 'RsaVerificationKey2018'],
       owner: ownerId,
       label: 'Signing Key 1',
       publicKeyPem: publicKey
@@ -96,29 +94,22 @@ api.createKeyPair = function(options) {
   return newKeyPair;
 };
 
-api.prepareDatabase = function(mockData, callback) {
+api.prepareDatabase = (mockData, callback) => {
   async.series([
-    callback => {
-      api.removeCollections(callback);
-    },
-    callback => {
-      insertTestData(mockData, callback);
-    }
+    callback => api.removeCollections(callback),
+    callback => insertTestData(mockData, callback)
   ], callback);
 };
 
 // Insert identities and public keys used for testing into database
 function insertTestData(mockData, callback) {
-  async.forEachOf(mockData.identities, function(identity, key, callback) {
+  async.forEachOf(mockData.identities, (identity, key, callback) => {
+    const {publicKey} = identity.keys;
     async.parallel([
-      function(callback) {
-        brIdentity.insert(null, identity.identity, callback);
-      },
-      function(callback) {
-        brKey.addPublicKey(null, identity.keys.publicKey, callback);
-      }
+      callback => brIdentity.insert(null, identity.identity, callback),
+      callback => brKey.addPublicKey({actor: null, publicKey}, callback)
     ], callback);
-  }, function(err) {
+  }, err => {
     if(err) {
       if(!database.isDuplicateError(err)) {
         // duplicate error means test data is already loaded

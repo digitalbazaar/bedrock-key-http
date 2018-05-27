@@ -17,9 +17,8 @@
   },
   "homepage": "https://github.com/digitalbazaar/bedrock-key-http",
   "dependencies": {
-    "async": "^1.4.2",
-    "cors": "^2.7.1",
-    "lodash": "^4.1.0"
+    "async": "^2.6.1",
+    "cors": "^2.7.1"
   },
   "peerDependencies": {
     "bedrock": "^1.0.6",

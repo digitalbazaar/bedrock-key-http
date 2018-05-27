@@ -1,7 +1,6 @@
 /*
- * Copyright (c) 2016-2017 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2018 Digital Bazaar, Inc. All rights reserved.
  */
-/* globals should */
 'use strict';
 
 const async = require('async');
@@ -20,7 +19,7 @@ const urlObj = {
   pathname: config.key.basePath
 };
 
-describe('bedrock-key-http API: getPublicKeys', function() {
+describe('bedrock-key-http API: getPublicKeys', () => {
   beforeEach(done => {
     helpers.prepareDatabase(mockData, done);
   });
@@ -39,8 +38,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -59,8 +57,9 @@ describe('bedrock-key-http API: getPublicKeys', function() {
       samplePublicKey.owner = mockIdentity.identity.id;
 
       async.auto({
-        insert: callback => brKey.addPublicKey(null, samplePublicKey, callback),
-        get: ['insert', callback => {
+        insert: callback => brKey.addPublicKey(
+          {actor: null, publicKey: samplePublicKey}, callback),
+        get: ['insert', (results, callback) => {
           urlObj.query = {owner: mockIdentity.identity.id};
           request.get(helpers.createHttpSignatureRequest({
             url: url.format(urlObj),
@@ -69,8 +68,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
             callback(err, res);
           });
         }],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           result.should.have.length(2);
@@ -96,8 +94,8 @@ describe('bedrock-key-http API: getPublicKeys', function() {
 
       async.auto({
         insert: callback => brKey.addPublicKey(
-          null, samplePublicKey, privateKey, callback),
-        get: ['insert', callback => {
+          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
+        get: ['insert', (results, callback) => {
           urlObj.query = {
             owner: mockIdentity.identity.id,
             capability: 'sign'
@@ -109,8 +107,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
             callback(err, res);
           });
         }],
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -134,8 +131,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           results.get.body.should.have.length(0);
           callback();
@@ -156,8 +152,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -186,8 +181,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -212,8 +206,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -243,8 +236,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
             callback(err, res);
           });
         },
-        test: ['get', (callback, results, err) => {
-          should.not.exist(err);
+        test: ['get', (results, callback) => {
           results.get.statusCode.should.equal(200);
           const result = results.get.body;
           results.get.body.should.have.length(1);
@@ -262,7 +254,7 @@ describe('bedrock-key-http API: getPublicKeys', function() {
 
     it('should return nothing for a non authenticated owner', done => {
       urlObj.query = {owner: 'foo'};
-      request.get(url.format(urlObj), function(err, res) {
+      request.get(url.format(urlObj), (err, res) => {
         res.statusCode.should.equal(200);
         should.exist(res.body);
         res.body.should.have.length(0);
