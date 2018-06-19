@@ -1,13 +1,14 @@
 /*
- * Copyright (c) 2012-2015 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2012-2018 Digital Bazaar, Inc. All rights reserved.
  */
-var constants = require('bedrock').config.constants;
-var schemas = require('bedrock-validation').schemas;
+const {constants} = require('bedrock').config;
+const {schemas} = require('bedrock-validation');
 
-var postKey = {
+const postKey = {
   type: 'object',
   properties: {
-    '@context': schemas.jsonldContext(constants.IDENTITY_CONTEXT_V1_URL),
+    '@context': schemas.jsonldContext(
+      constants.SECURITY_CONTEXT_V2_URL, {required: false}),
     id: schemas.identifier(),
     label: schemas.label({required: false}),
     revoked: {
@@ -18,39 +19,65 @@ var postKey = {
   additionalProperties: false
 };
 
-var getKeysQuery = {
+const getKeysQuery = {
   title: 'Get Keys Query',
   type: 'object',
   properties: {
-    owner: schemas.identifier({required: true}),
-    capability: {
-      required: false,
-      enum: ['sign']
-    }
+    owner: schemas.identifier({required: true})
   },
   additionalProperties: false
 };
 
-var postKeys = {
+const rsaKey = {
+  title: 'RSA Verification Key',
   type: 'object',
   properties: {
-    '@context': schemas.jsonldContext(constants.IDENTITY_CONTEXT_V1_URL),
+    '@context': schemas.jsonldContext(
+      constants.SECURITY_CONTEXT_V2_URL, {required: false}),
+    type: {
+      type: 'string',
+      enum: ['RsaVerificationKey2018'],
+      required: true
+    },
     label: schemas.label(),
-    owner: schemas.identifier({
-      required: false
-    }),
+    owner: schemas.identifier(),
     publicKeyPem: schemas.publicKeyPem(),
     privateKeyPem: schemas.privateKeyPem({required: false})
   },
   additionalProperties: false
 };
 
-module.exports.postKey = function() {
-  return postKey;
+const ed25519Key = {
+  title: 'Ed25519 Verification Key',
+  type: 'object',
+  properties: {
+    '@context': schemas.jsonldContext(
+      constants.SECURITY_CONTEXT_V2_URL, {required: false}),
+    type: {
+      type: 'string',
+      enum: ['Ed25519VerificationKey2018'],
+      required: true
+    },
+    label: schemas.label(),
+    owner: schemas.identifier(),
+    // FIXME: improve validation
+    publicKeyBase58: {
+      type: 'string',
+      required: true
+    },
+    // FIXME: include in security/v2 context (or transitively via security v1)
+    privateKeyBase58: {
+      type: 'string',
+      required: false
+    }
+  },
+  additionalProperties: false
 };
-module.exports.getKeysQuery = function() {
-  return getKeysQuery;
+
+const postKeys = {
+  type: [rsaKey, ed25519Key]
 };
-module.exports.postKeys = function() {
-  return postKeys;
-};
+
+module.exports.postKey = () => postKey;
+module.exports.getKeysQuery = () => getKeysQuery;
+module.exports.postKeys = () => postKeys;

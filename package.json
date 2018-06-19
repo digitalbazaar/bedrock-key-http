@@ -17,16 +17,16 @@
   },
   "homepage": "https://github.com/digitalbazaar/bedrock-key-http",
   "dependencies": {
-    "async": "^2.6.1",
-    "cors": "^2.7.1"
+    "cors": "^2.7.1",
+    "express-async-handler": "^1.1.3"
   },
   "peerDependencies": {
-    "bedrock": "^1.0.6",
+    "bedrock": "^1.12.1",
     "bedrock-docs": "^2.0.0",
-    "bedrock-key": "^4.0.0",
+    "bedrock-key": "^5.0.0",
     "bedrock-mongodb": "3.x - 5.x",
-    "bedrock-passport": "^3.0.0",
+    "bedrock-passport": "^4.0.2",
     "bedrock-rest": "^2.0.0",
-    "bedrock-validation": "^2.0.0"
+    "bedrock-validation": "^2.4.0"
   }
 }

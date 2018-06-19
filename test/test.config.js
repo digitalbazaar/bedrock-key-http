@@ -1,13 +1,13 @@
 /*
- * Bedrock Key HTTP Module Test Configuration.
- *
  * Copyright (c) 2012-2018 Digital Bazaar, Inc. All rights reserved.
  */
-const config = require('bedrock').config;
+'use strict';
+
+const {config} = require('bedrock');
 const path = require('path');
 
-const permissions = config.permission.permissions;
-const roles = config.permission.roles;
+const {permissions} = config.permission;
+const {roles} = config.permission;
 
 config.mocha.tests.push(path.join(__dirname, 'mocha'));
 

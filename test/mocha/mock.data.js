@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016-2018 Digital Bazaar, Inc. All rights reserved.
  */
-
 'use strict';
 
 const helpers = require('./helpers');
@@ -16,10 +15,12 @@ let userName;
 userName = 'regularUser';
 identities[userName] = {};
 identities[userName].identity = helpers.createIdentity(userName);
-identities[userName].identity.sysResourceRole.push({
-  sysRole: 'bedrock-key-http.test',
-  generateResource: 'id'
-});
+identities[userName].meta = {
+  sysResourceRole: [{
+    sysRole: 'bedrock-key-http.test',
+    generateResource: 'id'
+  }]
+};
 identities[userName].keys = helpers.createKeyPair({
   userName: userName,
   userId: identities[userName].identity.id,
@@ -65,10 +66,12 @@ identities[userName].keys = helpers.createKeyPair({
 userName = 'regularUser2';
 identities[userName] = {};
 identities[userName].identity = helpers.createIdentity(userName);
-identities[userName].identity.sysResourceRole.push({
-  sysRole: 'bedrock-key-http.test',
-  generateResource: 'id'
-});
+identities[userName].meta = {
+  sysResourceRole: [{
+    sysRole: 'bedrock-key-http.test',
+    generateResource: 'id'
+  }]
+};
 identities[userName].keys = helpers.createKeyPair({
   userName: userName,
   userId: identities[userName].identity.id,
@@ -114,9 +117,11 @@ identities[userName].keys = helpers.createKeyPair({
 userName = 'adminUser';
 identities[userName] = {};
 identities[userName].identity = helpers.createIdentity(userName);
-identities[userName].identity.sysResourceRole.push({
-  sysRole: 'bedrock-key-http.test'
-});
+identities[userName].meta = {
+  sysResourceRole: [{
+    sysRole: 'bedrock-key-http.test'
+  }]
+};
 identities[userName].keys = helpers.createKeyPair({
   userName: userName,
   userId: identities[userName].identity.id,

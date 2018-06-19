@@ -3,14 +3,14 @@
  */
 'use strict';
 
-const async = require('async');
 const bedrock = require('bedrock');
 const brKey = require('bedrock-key');
-const config = bedrock.config;
+const {config} = bedrock;
 const helpers = require('./helpers');
 const mockData = require('./mock.data');
 let request = require('request');
 request = request.defaults({json: true, strictSSL: false});
+const {promisify} = require('util');
 const url = require('url');
 
 const urlObj = {
@@ -19,212 +19,166 @@ const urlObj = {
   pathname: config.key.basePath
 };
 
+const GET = promisify(request.get);
+
 describe('bedrock-key-http API: getPublicKey', () => {
-  beforeEach(done => {
-    helpers.prepareDatabase(mockData, done);
+  beforeEach(async () => {
+    helpers.prepareDatabase(mockData);
   });
 
   describe('authenticated as regularUser', () => {
     const mockIdentity = mockData.identities.regularUser;
-    const actor = mockIdentity.identity;
+    const keyOwner = mockIdentity.identity;
 
-    it('should return a public key for an actor using key id', done => {
+    it('should return a public key for an owner using key id', async () => {
       const samplePublicKey = {};
       const privateKey = {};
 
       samplePublicKey.publicKeyPem = mockData.goodKeyPair.publicKeyPem;
-      samplePublicKey.owner = actor.id;
+      samplePublicKey.owner = keyOwner.id;
       privateKey.privateKeyPem = mockData.goodKeyPair.privateKeyPem;
 
-      async.auto({
-        insert: callback => brKey.addPublicKey(
-          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
-        get: ['insert', (results, callback) => request.get(
-          helpers.createHttpSignatureRequest({
-            url: samplePublicKey.id,
-            identity: mockIdentity
-          }), (err, res) => {
-            callback(err, res);
-          })],
-        test: ['get', (results, callback) => {
-          results.get.statusCode.should.equal(200);
-          const result = results.get.body;
-          result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
-          result.owner.should.equal(actor.id);
-          should.not.exist(result.privateKey);
-          callback();
-        }]
-      }, done);
+      await brKey.addPublicKey(
+        {actor: null, privateKey, publicKey: samplePublicKey});
+
+      const response = GET(helpers.createHttpSignatureRequest({
+        url: samplePublicKey.id,
+        identity: mockIdentity
+      }));
+      response.statusCode.should.equal(200);
+      const {body} = response;
+      body.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
+      body.owner.should.equal(keyOwner.id);
+      should.not.exist(keyOwner.privateKey);
     });
 
-    it('should return a public key for another actor using key id', done => {
+    it('should return a public key for another actor using key id',
+      async () => {
       const samplePublicKey = {};
       const mockIdentity2 = mockData.identities.regularUser2;
-      const secondActor = mockIdentity2.identity;
+      const secondOwner = mockIdentity2.identity;
 
       samplePublicKey.publicKeyPem = mockData.goodKeyPair.publicKeyPem;
-      samplePublicKey.owner = secondActor.id;
+      samplePublicKey.owner = secondOwner.id;
 
-      async.auto({
-        insert: callback => brKey.addPublicKey(
-          {actor: null, publicKey: samplePublicKey}, callback),
-        get: ['insert', (results, callback) => request.get(
-          helpers.createHttpSignatureRequest({
-            url: samplePublicKey.id,
-            identity: mockIdentity
-          }), (err, res) => {
-            callback(err, res);
-          })],
-        test: ['get', (results, callback) => {
-          results.get.statusCode.should.equal(200);
-          const result = results.get.body;
-          result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
-          result.owner.should.equal(secondActor.id);
-          should.not.exist(result.privateKey);
-          callback();
-        }]
-      }, done);
+      await brKey.addPublicKey({actor: null, publicKey: samplePublicKey});
+
+      const response = await GET(helpers.createHttpSignatureRequest({
+        url: samplePublicKey.id,
+        identity: mockIdentity
+      }));
+      response.statusCode.should.equal(200);
+      const {body} = response;
+      body.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
+      body.owner.should.equal(secondOwner.id);
+      should.not.exist(body.privateKey);
     });
 
-    it('should return nothing if key not found', done => {
+    it('should return nothing if key not found', async () => {
       const samplePublicKey = {};
-
       samplePublicKey.publicKeyPem = mockData.goodKeyPair.publicKeyPem;
-      samplePublicKey.owner = actor.id;
+      samplePublicKey.owner = keyOwner.id;
 
-      async.auto({
-        insert: callback => brKey.addPublicKey({
-          actor: null, publicKey: samplePublicKey}, callback),
-        get: ['insert', (results, callback) => request.get(
-          helpers.createHttpSignatureRequest({
-            url: (samplePublicKey.id + 1),
-            identity: mockIdentity
-          }), (err, res) => {
-            callback(err, res);
-          })],
-        test: ['get', (results, callback) => {
-          results.get.statusCode.should.equal(404);
-          const result = results.get;
-          should.exist(result.body);
-          result.body.should.be.an('object');
-          should.exist(result.body.type);
-          result.body.type.should.equal('NotFoundError');
-          callback();
-        }]
-      }, done);
+      await brKey.addPublicKey({actor: null, publicKey: samplePublicKey});
+      const response = await GET(helpers.createHttpSignatureRequest({
+        url: (samplePublicKey.id + 1),
+        identity: mockIdentity
+      }));
+      response.statusCode.should.equal(404);
+      should.exist(response.body);
+      response.body.should.be.an('object');
+      should.exist(response.body.type);
+      response.body.type.should.equal('NotFoundError');
     });
 
   }); // regular user
 
   describe('authenticated as adminUser', () => {
     const mockIdentity = mockData.identities.adminUser;
-    const actor = mockIdentity.identity;
+    const keyOwner = mockIdentity.identity;
 
-    it('should return a valid public key for an actor w/ id', done => {
+    it('should return a valid public key for an actor w/ id', async () => {
       const samplePublicKey = {};
       const privateKey = {};
 
       samplePublicKey.publicKeyPem = mockData.goodKeyPair.publicKeyPem;
-      samplePublicKey.owner = actor.id;
+      samplePublicKey.owner = keyOwner.id;
       privateKey.privateKeyPem = mockData.goodKeyPair.privateKeyPem;
 
-      async.auto({
-        insert: callback => brKey.addPublicKey(
-          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
-        get: ['insert', (results, callback) => request.get(
-          helpers.createHttpSignatureRequest({
-            url: samplePublicKey.id,
-            identity: mockIdentity
-          }), (err, res) => {
-            callback(err, res);
-          })],
-        test: ['get', (results, callback) => {
-          results.get.statusCode.should.equal(200);
-          const result = results.get.body;
-          result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
-          result.owner.should.equal(actor.id);
-          should.not.exist(result.privateKey);
-          callback();
-        }]
-      }, done);
+      await brKey.addPublicKey(
+        {actor: null, privateKey, publicKey: samplePublicKey});
+
+      const response = GET(helpers.createHttpSignatureRequest({
+        url: samplePublicKey.id,
+        identity: mockIdentity
+      }));
+      response.statusCode.should.equal(200);
+      const {body} = response;
+      body.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
+      body.owner.should.equal(keyOwner.id);
+      should.not.exist(body.privateKey);
     });
 
-    it('should return a public key for another actor using key id', done => {
+    it('should return a public key for another actor using key id',
+      async () => {
       const samplePublicKey = {};
       const mockIdentity2 = mockData.identities.regularUser2;
-      const secondActor = mockIdentity2.identity;
+      const secondOwner = mockIdentity2.identity;
 
       samplePublicKey.publicKeyPem = mockData.goodKeyPair.publicKeyPem;
-      samplePublicKey.owner = secondActor.id;
+      samplePublicKey.owner = secondOwner.id;
 
-      async.auto({
-        insert: callback => brKey.addPublicKey(
-          {actor: null, publicKey: samplePublicKey}, callback),
-        get: ['insert', (results, callback) => request.get(
-          helpers.createHttpSignatureRequest({
-            url: samplePublicKey.id,
-            identity: mockIdentity
-          }), (err, res) => {
-            callback(err, res);
-          })],
-        test: ['get', (results, callback) => {
-          results.get.statusCode.should.equal(200);
-          const result = results.get.body;
-          result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
-          result.owner.should.equal(secondActor.id);
-          should.not.exist(result.privateKey);
-          callback();
-        }]
-      }, done);
+      await brKey.addPublicKey({actor: null, publicKey: samplePublicKey});
+
+      const response = await GET(helpers.createHttpSignatureRequest({
+        url: samplePublicKey.id,
+        identity: mockIdentity
+      }));
+      response.statusCode.should.equal(200);
+      const {body} = response;
+      body.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
+      body.owner.should.equal(secondOwner.id);
+      should.not.exist(body.privateKey);
     });
 
   }); // admin user
 
   describe('authenticated as user with no permissions', () => {
     const mockIdentity = mockData.identities.noPermissionUser;
-    const actor = mockIdentity.identity;
+    const keyOwner = mockIdentity.identity;
 
-    it('should return a public key for an actor using key id', done => {
+    it('should return a public key for an actor using key id', async () => {
       const samplePublicKey = {};
       const privateKey = {};
 
       samplePublicKey.publicKeyPem = mockData.goodKeyPair.publicKeyPem;
-      samplePublicKey.owner = actor.id;
+      samplePublicKey.owner = keyOwner.id;
       privateKey.privateKeyPem = mockData.goodKeyPair.privateKeyPem;
 
-      async.auto({
-        insert: callback => brKey.addPublicKey(
-          {actor: null, privateKey, publicKey: samplePublicKey}, callback),
-        get: ['insert', (results, callback) => request.get(
-          helpers.createHttpSignatureRequest({
-            url: samplePublicKey.id,
-            identity: mockIdentity
-          }), (err, res) => {
-            callback(err, res);
-          })],
-        test: ['get', (results, callback) => {
-          results.get.statusCode.should.equal(200);
-          const result = results.get.body;
-          result.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
-          result.owner.should.equal(actor.id);
-          should.not.exist(result.privateKey);
-          callback();
-        }]
-      }, done);
+      await brKey.addPublicKey(
+        {actor: null, privateKey, publicKey: samplePublicKey});
+
+      const response = GET(helpers.createHttpSignatureRequest({
+        url: samplePublicKey.id,
+        identity: mockIdentity
+      }));
+      response.statusCode.should.equal(200);
+      const {body} = response;
+      body.publicKeyPem.should.equal(mockData.goodKeyPair.publicKeyPem);
+      body.owner.should.equal(keyOwner.id);
+      should.not.exist(body.privateKey);
     });
 
   }); // noPermissionUser
 
   describe('User with no authentication', () => {
 
-    it('should return error for nonauthenticated ID (no Key)', done => {
+    it('should return error for nonauthenticated ID (no Key)', async () => {
       urlObj.pathname += '/99';
-      request.get(url.format(urlObj), (err, res) => {
-        res.statusCode.should.equal(404);
-        should.exist(res.body.type);
-        res.body.type.should.equal('NotFoundError');
-        done();
-      });
+      const response = GET(url.format(urlObj));
+      response.statusCode.should.equal(404);
+      should.exist(response.body.type);
+      response.body.type.should.equal('NotFoundError');
     });
 
   }); // no authentication
