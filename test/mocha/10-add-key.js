@@ -1,17 +1,16 @@
 /*
- * Copyright (c) 2016-2017 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2018 Digital Bazaar, Inc. All rights reserved.
  */
-/* globals should */
 'use strict';
 
-const async = require('async');
 const bedrock = require('bedrock');
-const config = bedrock.config;
+const {config} = bedrock;
 const database = require('bedrock-mongodb');
 const helpers = require('./helpers');
 const mockData = require('./mock.data');
 let request = require('request');
 request = request.defaults({json: true, strictSSL: false});
+const {promisify} = require('util');
 const url = require('url');
 
 const urlObj = {
@@ -20,311 +19,244 @@ const urlObj = {
   pathname: config.key.basePath
 };
 
+const POST = promisify(request.post);
+
+const SECURITY_V2_CONTEXT = 'https://w3id.org/security/v2';
+
 describe('bedrock-key-http API: addPublicKey', () => {
-  beforeEach(done => helpers.prepareDatabase(mockData, done));
+  beforeEach(async () => {
+    await helpers.prepareDatabase(mockData);
+  });
 
   describe('authenticated as regularUser', () => {
-    const actor = mockData.identities.regularUser;
+    const keyOwner = mockData.identities.regularUser;
 
-    it('should add a valid public key with no private key', done => {
+    it('should add a valid public key with no private key', async () => {
       const newKey = mockData.goodKeyPair;
       const samplePublicKey = {
-        '@context': 'https://w3id.org/identity/v1',
+        '@context': 'https://w3id.org/security/v2',
+        type: 'RsaVerificationKey2018',
         label: 'Signing Key 1',
-        owner: actor.identity.id,
+        owner: keyOwner.identity.id,
         publicKeyPem: newKey.publicKeyPem
       };
 
-      async.auto({
-        insert: callback => async.series([
-          callback => database.collections.publicKey.find({
-            'publicKey.owner': actor.identity.id
-          }).toArray((err, result) => {
-            should.not.exist(err);
-            should.exist(result);
-            result.should.have.length(1);
-            result[0].publicKey.publicKeyPem.should.equal(
-              actor.keys.publicKey.publicKeyPem);
-            callback();
-          }),
-          callback => request.post(helpers.createHttpSignatureRequest({
-            url: url.format(urlObj),
-            body: samplePublicKey,
-            identity: actor
-          }), (err, res) => {
-            res.statusCode.should.equal(201);
-            callback(err, res);
-          })
-        ], callback),
-        test: ['insert', callback => {
-          database.collections.publicKey.find({
-            'publicKey.owner': actor.identity.id
-          }).toArray((err, result) => {
-            should.not.exist(err);
-            should.exist(result);
-            result.should.have.length(2);
-            result[1].publicKey.publicKeyPem.should.equal(
-              newKey.publicKeyPem);
-            should.not.exist(result[1].publicKey.privateKey);
-            callback();
-          });
-        }]
-      }, done);
+      let result = await database.collections.publicKey.find(
+        {'publicKey.owner': keyOwner.identity.id}).toArray();
+      should.exist(result);
+      result.should.have.length(1);
+      result[0].publicKey.publicKeyPem.should.equal(
+        keyOwner.keys.publicKey.publicKeyPem);
+
+      const response = await POST(helpers.createHttpSignatureRequest({
+        url: url.format(urlObj),
+        body: samplePublicKey,
+        identity: keyOwner
+      }));
+      response.statusCode.should.equal(201);
+
+      result = await database.collections.publicKey.find(
+        {'publicKey.owner': keyOwner.identity.id}).toArray();
+      should.exist(result);
+      result.should.have.length(2);
+      result[1].publicKey.publicKeyPem.should.equal(
+        newKey.publicKeyPem);
+      should.not.exist(result[1].publicKey.privateKey);
     });
 
-    it('should add a valid public key with matching private key', done => {
+    it('should add a valid public key with matching private key', async () => {
       const newKey = mockData.goodKeyPair;
       const samplePublicKey = {
-        '@context': 'https://w3id.org/identity/v1',
+        '@context': SECURITY_V2_CONTEXT,
+        type: 'RsaVerificationKey2018',
         label: 'Signing Key 1',
-        owner: actor.identity.id,
+        owner: keyOwner.identity.id,
         publicKeyPem: newKey.publicKeyPem,
         privateKeyPem: newKey.privateKeyPem
       };
 
-      async.auto({
-        insert: callback => async.series([
-          callback => database.collections.publicKey.find({
-            'publicKey.owner': actor.identity.id
-          }).toArray((err, result) => {
-            should.not.exist(err);
-            should.exist(result);
-            result.should.have.length(1);
-            result[0].publicKey.publicKeyPem.should.equal(
-              actor.keys.publicKey.publicKeyPem);
-            callback();
-          }),
-          callback => request.post(helpers.createHttpSignatureRequest({
-            url: url.format(urlObj),
-            body: samplePublicKey,
-            identity: actor
-          }), (err, res) => {
-            res.statusCode.should.equal(201);
-            callback(err, res);
-          })
-        ], callback),
-        test: ['insert', callback => {
-          database.collections.publicKey.find({
-            'publicKey.owner': actor.identity.id
-          }).toArray((err, result) => {
-            should.not.exist(err);
-            should.exist(result);
-            result.should.have.length(2);
-            result[1].publicKey.publicKeyPem.should.equal(
-              newKey.publicKeyPem);
-            should.exist(result[1].publicKey.privateKey);
-            result[1].publicKey.privateKey.privateKeyPem.should.equal(
-              newKey.privateKeyPem);
-            callback();
-          });
-        }]
-      }, done);
+      let result = await database.collections.publicKey.find(
+        {'publicKey.owner': keyOwner.identity.id}).toArray();
+      should.exist(result);
+      result.should.have.length(1);
+      result[0].publicKey.publicKeyPem.should.equal(
+        keyOwner.keys.publicKey.publicKeyPem);
+
+      const response = await POST(helpers.createHttpSignatureRequest({
+        url: url.format(urlObj),
+        body: samplePublicKey,
+        identity: keyOwner
+      }));
+      response.statusCode.should.equal(201);
+
+      result = await database.collections.publicKey.find(
+        {'publicKey.owner': keyOwner.identity.id}).toArray();
+      should.exist(result);
+      result.should.have.length(2);
+      result[1].publicKey.publicKeyPem.should.equal(
+        newKey.publicKeyPem);
+      should.exist(result[1].publicKey.privateKey);
+      result[1].publicKey.privateKey.privateKeyPem.should.equal(
+        newKey.privateKeyPem);
     });
 
-    it('should return error if adding public key w/ bad private key', done => {
+    it('should return error if adding public key w/ bad private key',
+      async () => {
       const newKey = mockData.badKeyPair;
       const samplePublicKey = {
-        '@context': 'https://w3id.org/identity/v1',
+        '@context': SECURITY_V2_CONTEXT,
+        type: 'RsaVerificationKey2018',
         label: 'Signing Key 1',
-        owner: actor.identity.id,
+        owner: keyOwner.identity.id,
         publicKeyPem: newKey.publicKeyPem,
         privateKeyPem: newKey.privateKeyPem
       };
 
-      async.auto({
-        insert: callback => request.post(helpers.createHttpSignatureRequest({
-          url: url.format(urlObj),
-          body: samplePublicKey,
-          identity: actor
-        }), (err, res) => {
-          callback(err, res);
-        }),
-        test: ['insert', (callback, results) => {
-          results.insert.statusCode.should.equal(400);
-          results.insert.body.cause.type.should.equal('InvalidKeyPair');
-          callback();
-        }]
-      }, done);
+      const response = await POST(helpers.createHttpSignatureRequest({
+        url: url.format(urlObj),
+        body: samplePublicKey,
+        identity: keyOwner
+      }));
+      response.statusCode.should.equal(400);
+      response.body.cause.type.should.equal('SyntaxError');
     });
 
-    it('should return error if owner id does not match', done => {
+    it('should return error if owner id does not match', async () => {
       const newKey = mockData.goodKeyPair;
       const samplePublicKey = {
-        '@context': 'https://w3id.org/identity/v1',
+        '@context': SECURITY_V2_CONTEXT,
+        type: 'RsaVerificationKey2018',
         label: 'Signing Key 1',
-        owner: actor.identity.id + 1,
+        owner: keyOwner.identity.id + 1,
         publicKeyPem: newKey.publicKeyPem,
         privateKeyPem: newKey.privateKeyPem
       };
 
-      async.auto({
-        insert: callback => request.post(helpers.createHttpSignatureRequest({
-          url: url.format(urlObj),
-          body: samplePublicKey,
-          identity: actor
-        }), (err, res) => {
-          callback(err, res);
-        }),
-        test: ['insert', (callback, results) => {
-          results.insert.statusCode.should.equal(400);
-          results.insert.body.cause.type.should.equal('PermissionDenied');
-          callback();
-        }]
-      }, done);
+      const response = await POST(helpers.createHttpSignatureRequest({
+        url: url.format(urlObj),
+        body: samplePublicKey,
+        identity: keyOwner
+      }));
+      response.statusCode.should.equal(400);
+      response.body.cause.type.should.equal('PermissionDenied');
     });
 
   }); // regular user
 
   describe('authenticated as adminUser', () => {
-    const actor = mockData.identities.adminUser;
+    const keyOwner = mockData.identities.adminUser;
 
-    it('should add a valid public key for self', done => {
+    it('should add a valid public key for self', async () => {
       const newKey = mockData.goodKeyPair;
       const samplePublicKey = {
-        '@context': 'https://w3id.org/identity/v1',
+        '@context': SECURITY_V2_CONTEXT,
+        type: 'RsaVerificationKey2018',
         label: 'Signing Key 1',
-        owner: actor.identity.id,
+        owner: keyOwner.identity.id,
         publicKeyPem: newKey.publicKeyPem
       };
 
-      async.auto({
-        insert: callback => async.series([
-          callback => database.collections.publicKey.find({
-            'publicKey.owner': actor.identity.id
-          }).toArray((err, result) => {
-            should.not.exist(err);
-            should.exist(result);
-            result.should.have.length(1);
-            result[0].publicKey.publicKeyPem.should.equal(
-              actor.keys.publicKey.publicKeyPem);
-            callback();
-          }),
-          callback => request.post(helpers.createHttpSignatureRequest({
-            url: url.format(urlObj),
-            body: samplePublicKey,
-            identity: actor
-          }), (err, res) => {
-            res.statusCode.should.equal(201);
-            callback(err, res);
-          })
-        ], callback),
-        test: ['insert', callback => {
-          database.collections.publicKey.find({
-            'publicKey.owner': actor.identity.id
-          }).toArray((err, result) => {
-            should.not.exist(err);
-            should.exist(result);
-            result.should.have.length(2);
-            result[1].publicKey.publicKeyPem.should.equal(
-              newKey.publicKeyPem);
-            should.not.exist(result[1].publicKey.privateKey);
-            callback();
-          });
-        }]
-      }, done);
+      let result = await database.collections.publicKey.find(
+        {'publicKey.owner': keyOwner.identity.id}).toArray();
+      should.exist(result);
+      result.should.have.length(1);
+      result[0].publicKey.publicKeyPem.should.equal(
+        keyOwner.keys.publicKey.publicKeyPem);
+
+      const response = await POST(helpers.createHttpSignatureRequest({
+        url: url.format(urlObj),
+        body: samplePublicKey,
+        identity: keyOwner
+      }));
+      response.statusCode.should.equal(201);
+
+      result = await database.collections.publicKey.find(
+        {'publicKey.owner': keyOwner.identity.id}).toArray();
+      should.exist(result);
+      result.should.have.length(2);
+      result[1].publicKey.publicKeyPem.should.equal(
+        newKey.publicKeyPem);
+      should.not.exist(result[1].publicKey.privateKey);
     });
 
-    it('should add a valid public key for another user', done => {
-      const actor2 = mockData.identities.regularUser;
+    it('should add a valid public key for another user', async () => {
+      const keyOwner2 = mockData.identities.regularUser;
       const newKey = mockData.goodKeyPair;
       const samplePublicKey = {
-        '@context': 'https://w3id.org/identity/v1',
+        '@context': SECURITY_V2_CONTEXT,
+        type: 'RsaVerificationKey2018',
         label: 'Signing Key 1',
-        owner: actor2.identity.id,
+        owner: keyOwner2.identity.id,
         publicKeyPem: newKey.publicKeyPem
       };
 
-      async.auto({
-        insert: callback => async.series([
-          callback => database.collections.publicKey.find({
-            'publicKey.owner': actor.identity.id
-          }).toArray((err, result) => {
-            should.not.exist(err);
-            should.exist(result);
-            result.should.have.length(1);
-            result[0].publicKey.publicKeyPem.should.equal(
-              actor.keys.publicKey.publicKeyPem);
-            callback();
-          }),
-          callback => database.collections.publicKey.find({
-            'publicKey.owner': actor2.identity.id
-          }).toArray((err, result) => {
-            should.not.exist(err);
-            should.exist(result);
-            result.should.have.length(1);
-            result[0].publicKey.publicKeyPem.should.equal(
-              actor2.keys.publicKey.publicKeyPem);
-            callback();
-          }),
-          callback => request.post(helpers.createHttpSignatureRequest({
-            url: url.format(urlObj),
-            body: samplePublicKey,
-            identity: actor
-          }), (err, res) => {
-            res.statusCode.should.equal(201);
-            callback(err, res);
-          })
-        ], callback),
-        test: ['insert', callback => {
-          database.collections.publicKey.find({
-            'publicKey.owner': actor2.identity.id
-          }).toArray((err, result) => {
-            should.not.exist(err);
-            should.exist(result);
-            result.should.have.length(2);
-            result[1].publicKey.publicKeyPem.should.equal(
-              newKey.publicKeyPem);
-            should.not.exist(result[1].publicKey.privateKey);
-            callback();
-          });
-        }]
-      }, done);
+      let result = await database.collections.publicKey.find(
+        {'publicKey.owner': keyOwner.identity.id}).toArray();
+      should.exist(result);
+      result.should.have.length(1);
+      result[0].publicKey.publicKeyPem.should.equal(
+        keyOwner.keys.publicKey.publicKeyPem);
+
+      result = await database.collections.publicKey.find(
+        {'publicKey.owner': keyOwner2.identity.id}).toArray();
+      should.exist(result);
+      result.should.have.length(1);
+      result[0].publicKey.publicKeyPem.should.equal(
+        keyOwner2.keys.publicKey.publicKeyPem);
+
+      const response = await POST(helpers.createHttpSignatureRequest({
+        url: url.format(urlObj),
+        body: samplePublicKey,
+        identity: keyOwner
+      }));
+      response.statusCode.should.equal(201);
+
+      result = await database.collections.publicKey.find(
+        {'publicKey.owner': keyOwner2.identity.id}).toArray();
+      should.exist(result);
+      result.should.have.length(2);
+      result[1].publicKey.publicKeyPem.should.equal(
+        newKey.publicKeyPem);
+      should.not.exist(result[1].publicKey.privateKey);
     });
 
   }); // admin user
 
   describe('authenticated as user with no permissions', () => {
-    const actor = mockData.identities.noPermissionUser;
+    const keyOwner = mockData.identities.noPermissionUser;
 
-    it('should return error when adding public key w/o permissions', done => {
+    it(
+      'should return error when adding public key w/o permissions', async () => {
       const newKey = mockData.goodKeyPair;
       const samplePublicKey = {
-        '@context': 'https://w3id.org/identity/v1',
+        '@context': SECURITY_V2_CONTEXT,
+        type: 'RsaVerificationKey2018',
         label: 'Signing Key 1',
-        owner: actor.identity.id,
+        owner: keyOwner.identity.id,
         publicKeyPem: newKey.publicKeyPem,
         privateKeyPem: newKey.privateKeyPem
       };
 
-      async.auto({
-        insert: callback => request.post(helpers.createHttpSignatureRequest({
-          url: url.format(urlObj),
-          body: samplePublicKey,
-          identity: actor
-        }), (err, res) => {
-          callback(err, res);
-        }),
-        test: ['insert', (callback, results) => {
-          results.insert.statusCode.should.equal(400);
-          results.insert.body.cause.type.should.equal('PermissionDenied');
-          callback();
-        }]
-      }, done);
+      const response = await POST(helpers.createHttpSignatureRequest({
+        url: url.format(urlObj),
+        body: samplePublicKey,
+        identity: keyOwner
+      }));
+      response.statusCode.should.equal(400);
+      response.body.cause.type.should.equal('PermissionDenied');
     });
 
   }); // noPermissionUser
 
-  describe('user with no authentication', () => {
+  describe('user with no authentication', async () => {
 
-    it('should return error when not authenticated', done => {
-      request.post(url.format(urlObj), (err, res, body) => {
-        res.statusCode.should.equal(400);
-        should.exist(body);
-        body.should.be.an('object');
-        should.exist(body.type);
-        body.type.should.equal('PermissionDenied');
-        done();
-      });
+    it('should return error when not authenticated', async () => {
+      const response = await POST(url.format(urlObj));
+      response.statusCode.should.equal(400);
+      should.exist(response.body);
+      response.body.should.be.an('object');
+      should.exist(response.body.type);
+      response.body.type.should.equal('NotAllowedError');
     });
 
   }); // no authentication

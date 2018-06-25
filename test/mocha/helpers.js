@@ -1,24 +1,24 @@
 /*
- * Copyright (c) 2016-2017 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2016-2018 Digital Bazaar, Inc. All rights reserved.
  */
 'use strict';
 
-const async = require('async');
 const brIdentity = require('bedrock-identity');
 const brKey = require('bedrock-key');
 const database = require('bedrock-mongodb');
-const uuid = require('uuid').v4;
+const {promisify} = require('util');
+const uuid = require('uuid/v4');
 
 const api = {};
 module.exports = api;
 
-api.createHttpSignatureRequest = function(options) {
+api.createHttpSignatureRequest = options => {
   const newRequest = {
     url: options.url,
     httpSignature: {
       key: options.identity.keys.privateKey.privateKeyPem,
       keyId: options.identity.keys.publicKey.id,
-      headers: ['date', 'host', 'request-line']
+      headers: ['date', 'host', '(request-target)']
     }
   };
   if(options.body) {
@@ -27,46 +27,29 @@ api.createHttpSignatureRequest = function(options) {
   return newRequest;
 };
 
-api.createIdentity = function(userName) {
+api.createIdentity = userName => {
   const newIdentity = {
-    id: 'did:' + uuid(),
-    type: 'Identity',
-    sysSlug: userName,
+    id: 'did:example:' + uuid(),
     label: userName,
     email: userName + '@bedrock.dev',
-    sysPassword: 'password',
-    sysPublic: ['label', 'url', 'description'],
-    sysResourceRole: [],
     url: 'https://example.com',
-    description: userName,
-    sysStatus: 'active'
+    description: userName
   };
   return newIdentity;
 };
 
-api.removeCollection = function(collection, callback) {
-  const collectionNames = [collection];
-  database.openCollections(collectionNames, () => {
-    async.each(collectionNames, function(collectionName, callback) {
-      database.collections[collectionName].remove({}, callback);
-    }, function(err) {
-      callback(err);
-    });
-  });
+api.removeCollection =
+  async collectionName => api.removeCollections([collectionName]);
+
+api.removeCollections = async (collectionNames = [
+  'identity', 'publicKey', 'eventLog']) => {
+  await promisify(database.openCollections)(collectionNames);
+  for(const collectionName of collectionNames) {
+    await database.collections[collectionName].remove({});
+  }
 };
 
-api.removeCollections = function(callback) {
-  const collectionNames = ['identity', 'eventLog', 'publicKey'];
-  database.openCollections(collectionNames, () => {
-    async.each(collectionNames, (collectionName, callback) => {
-      database.collections[collectionName].remove({}, callback);
-    }, function(err) {
-      callback(err);
-    });
-  });
-};
-
-api.createKeyPair = function(options) {
+api.createKeyPair = options => {
   const userName = options.userName;
   const publicKey = options.publicKey;
   const privateKey = options.privateKey;
@@ -80,13 +63,13 @@ api.createKeyPair = function(options) {
     publicKey: {
       '@context': 'https://w3id.org/identity/v1',
       id: ownerId + '/keys/1',
-      type: 'CryptographicKey',
+      type: 'RsaVerificationKey2018',
       owner: ownerId,
       label: 'Signing Key 1',
       publicKeyPem: publicKey
     },
     privateKey: {
-      type: 'CryptographicKey',
+      type: 'RsaSignatureKey2018',
       owner: ownerId,
       label: 'Signing Key 1',
       publicKey: ownerId + '/keys/1',
@@ -96,35 +79,27 @@ api.createKeyPair = function(options) {
   return newKeyPair;
 };
 
-api.prepareDatabase = function(mockData, callback) {
-  async.series([
-    callback => {
-      api.removeCollections(callback);
-    },
-    callback => {
-      insertTestData(mockData, callback);
-    }
-  ], callback);
+api.prepareDatabase = async mockData => {
+  await api.removeCollections();
+  await insertTestData(mockData);
 };
 
-// Insert identities and public keys used for testing into database
-function insertTestData(mockData, callback) {
-  async.forEachOf(mockData.identities, function(identity, key, callback) {
-    async.parallel([
-      function(callback) {
-        brIdentity.insert(null, identity.identity, callback);
-      },
-      function(callback) {
-        brKey.addPublicKey(null, identity.keys.publicKey, callback);
-      }
-    ], callback);
-  }, function(err) {
-    if(err) {
-      if(!database.isDuplicateError(err)) {
+async function insertTestData(mockData) {
+  const records = Object.values(mockData.identities);
+  for(const record of records) {
+    try {
+      await Promise.all([
+        brIdentity.insert(
+          {actor: null, identity: record.identity, meta: record.meta || {}}),
+        brKey.addPublicKey(
+          {actor: null, publicKey: record.keys.publicKey})
+      ]);
+    } catch(e) {
+      if(e.name === 'DuplicateError') {
         // duplicate error means test data is already loaded
-        return callback(err);
+        continue;
       }
+      throw e;
     }
-    callback();
-  }, callback);
+  }
 }
