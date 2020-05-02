@@ -19,7 +19,8 @@
   "dependencies": {
     "async": "^1.4.2",
     "cors": "^2.7.1",
-    "lodash": "^4.1.0"
+    "lodash": "^4.1.0",
+    "snyk": "^1.316.2"
   },
   "peerDependencies": {
     "bedrock": "^1.0.6",
@@ -29,5 +30,10 @@
     "bedrock-passport": "^3.0.0",
     "bedrock-rest": "^2.0.0",
     "bedrock-validation": "^2.0.0"
-  }
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
